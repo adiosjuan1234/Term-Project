@@ -224,14 +224,14 @@ def bowserCastleThree_redrawAll(app, canvas):
     canvas.create_image(app.cx, app.cy,
                         image=ImageTk.PhotoImage(app.bowserCastle3))
 
-def floorCasting():
-    hres = 120
-    halfvres = 100
+# def floorCasting():
+#     hres = 120
+#     halfvres = 100
 
-    mod = hres/60
-    posx, posy, angle = 0, 0, 0
+#     mod = hres/60
+#     posx, posy, angle = 0, 0, 0
 
-    for i in range(hres):
-        rot_i = rot + mod
+#     for i in range(hres):
+#         rot_i = rot + mod
 
 runApp(width=676, height=450)
