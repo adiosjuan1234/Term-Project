@@ -6,19 +6,19 @@ def almostEqual(d1, d2, epsilon=10**-7):
     return (abs(d2 - d1) < epsilon)
 
 def appStarted(app):
-    app.cx = 300
-    app.cy = 300
+    app.cx = 32
+    app.cy = 32
     app.playerRadius = 5
     app.cellWidth = 64
     app.map = [
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 1, 0, 0, 1, 0, 1],
-            [1, 0, 1, 0, 0, 0, 0, 1],
-            [1, 0, 1, 0, 0, 0, 0, 1],
-            [1, 0, 1, 1, 1, 1, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1]
+            [0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 1, 1, 0, 1, 0, 1, 0],
+            [0, 1, 1, 0, 1, 0, 1, 0],
+            [0, 1, 1, 0, 1, 0, 1, 0],
+            [0, 1, 1, 0, 1, 0, 1, 0],
+            [0, 1, 1, 0, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0]
         ]
     app.angle = 0
 
@@ -36,66 +36,109 @@ def drawGrid(cellWidth, map, app, canvas):
         for col in range(len(map[0])):
             canvas.create_rectangle(cellWidth * col, cellWidth * row,
                                         cellWidth * (col+1), cellWidth*(row+1),
-                                        fill='dark gray', width=1)
+                                        fill='black', width=1)
             if map[row][col] == 1:
                 canvas.create_rectangle(cellWidth * col, cellWidth * row,
                                         cellWidth * (col+1), cellWidth*(row+1),
                                         fill='white', width=1)
-                
+
+def rayDist(cx, cy, rx, ry):
+    return sqrt((rx-cx)**2 + (ry-cy**2))                
 
 def drawRays(app, canvas):
+    # Draw 1 ray for now
     for _ in range(1):
+
+        # Horizontal ray casting
         dof = 0
-        if app.angle == 0 or app.angle == pi:
+        hx, hy, distH = app.cx, app.cy, 0
+        if almostEqual(app.angle, 0, 0.1) or almostEqual(app.angle, pi, 0.1):
             rx = app.cx
             ry = app.cy
             dof = 8
-        elif almostEqual(app.angle, pi/2, 0.001) or almostEqual(app.angle, pi*1.5, 0.001):
-            ry = app.cy//64*64
-            rx = app.cx
-            y0 = -64
-            x0 = 0
-        aTan = -1/tan(app.angle)
-        if app.angle < pi:
-            ry = app.cy//64*64
-            rx = int((app.cy-ry)*aTan+app.cx)
-            y0 = -64
-            x0 = int(-y0*aTan)
-        elif app.angle > pi:
-            ry = app.cy//64*64 + 64
-            rx = int((app.cy-ry)*aTan+app.cx)
-            y0 = 64
-            x0 = int(-y0*aTan)
+        else:
+            aTan = -1/tan(app.angle)
+            print(aTan)
+            if app.angle < pi:
+                ry = (app.cy//app.cellWidth)*app.cellWidth
+                rx = int(app.cx + (app.cy-ry)*aTan)
+                y0 = -1*app.cellWidth
+                x0 = int(-1*y0*aTan)
+            elif app.angle > pi:
+                ry = (app.cy//app.cellWidth)*app.cellWidth + app.cellWidth
+                rx = int(app.cx + (app.cy-ry)*aTan)
+                y0 = app.cellWidth
+                x0 = int(-1*y0*aTan)
         while dof < 8:
-            mx = rx//64
-            my = ry//64
+            mx = rx//app.cellWidth
+            my = ry//app.cellWidth
             if mx < len(app.map[0]) and mx >= 0:
                 if my >= 0 and my < len(app.map):
                     if app.map[my][mx] == 1:
                         dof = 8
+                        hx, hy = rx, ry
+                        distH = rayDist(app.cx, app.cy, hx, hy)
                     else:
                         rx += x0
                         ry += y0
                         dof += 1
-        canvas.create_line(app.cx, app.cy, rx, ry, fill='yellow', width=5)
+        
+        # Vertical ray casting
+        dof = 0
+        vx, vy, distV = app.cx, app.cy, 0
+        if almostEqual(app.angle, 0, 0.1) or almostEqual(app.angle, pi, 0.1):
+            rx = app.cx
+            ry = app.cy
+            dof = 8
+        else:
+            nTan = -1*tan(app.angle)
+            print(aTan)
+            if app.angle > pi/2 and app.angle < pi*1.5:
+                rx = (app.cx//app.cellWidth)*app.cellWidth
+                ry = int(app.cy + (app.cx-rx)*nTan)
+                x0 = -1*app.cellWidth
+                y0 = int(-1*x0*nTan)
+            elif app.angle < pi/2 or app.angle > pi*1.5:
+                rx = (app.cx//app.cellWidth)*app.cellWidth + app.cellWidth
+                ry = int(app.cy + (app.cx-rx)*nTan)
+                x0 = app.cellWidth
+                y0 = int(-1*x0*nTan)
+        while dof < 8:
+            mx = rx//app.cellWidth
+            my = ry//app.cellWidth
+            if mx < len(app.map[0]) and mx >= 0:
+                if my >= 0 and my < len(app.map):
+                    if app.map[my][mx] == 1:
+                        dof = 8
+                        vx, vy = rx, ry
+                        distV = rayDist(app.cx, app.cy, vx, vy)
+                    else:
+                        rx += x0
+                        ry += y0
+                        dof += 1
+        
+        # Find the shortest ray and draw it
+        if distH < distV:
+            vx, vy = app.cx, app.cy
+        elif distV < distH:
+            hx, hy = app.cx, app.cy
+        canvas.create_line(app.cx, app.cy, rx, ry, fill='green')
 
 def keyPressed(app, event):
+    dy = app.playerRadius*sin(app.angle)
+    dx = app.playerRadius*cos(app.angle)
     if event.key == 'w':
-        dy = app.playerRadius*sin(app.angle)
-        dx = app.playerRadius*cos(app.angle)
         app.cy -= dy
         app.cx += dx
     elif event.key == 's':
-        dy = app.playerRadius*sin(app.angle)
-        dx = app.playerRadius*cos(app.angle)
         app.cy += dy
         app.cx -= dx
     elif event.key == 'Left':
-        app.angle += pi/32
+        app.angle += 0.1
         if app.angle >= 2*pi:
             app.angle -= 2*pi
     elif event.key == 'Right':
-        app.angle -= pi/32
+        app.angle -= 0.1
         if app.angle <= -2*pi:
             app.angle += 2*pi
 

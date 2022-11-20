@@ -213,15 +213,15 @@ def specialCup_mousePressed(app, event):
             app.mode = 'bowserCastleThree'
 
 def marioCircuitOne_redrawAll(app, canvas):
-    canvas.create_image(app.cx, app.cy,
+    canvas.create_image(0, app.cy,
                         image=ImageTk.PhotoImage(app.marioCircuit1))
 
 def chocoIslandTwo_redrawAll(app, canvas):
-    canvas.create_image(app.cx, app.cy,
+    canvas.create_image(app.width, app.cy-120,
                         image=ImageTk.PhotoImage(app.chocoIsland2))
 
 def bowserCastleThree_redrawAll(app, canvas):
-    canvas.create_image(app.cx, app.cy,
+    canvas.create_image(0, app.cy+200,
                         image=ImageTk.PhotoImage(app.bowserCastle3))
 
 # def floorCasting():
