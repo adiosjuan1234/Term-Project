@@ -1,115 +1,111 @@
 from cmu_112_graphics import *
+from math import *
+
+def almostEqual(d1, d2, epsilon=10**-7):
+    # note: use math.isclose() outside 15-112 with Python version 3.5 or later
+    return (abs(d2 - d1) < epsilon)
 
 def appStarted(app):
-    app.mode = 'startMenu'
-    app.cx = app.width/2
-    app.cy = app.height/2
+    app.cx = 300
+    app.cy = 300
+    app.playerRadius = 5
+    app.cellWidth = 64
+    app.map = [
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 1, 0, 0, 1, 0, 1],
+            [1, 0, 1, 0, 0, 0, 0, 1],
+            [1, 0, 1, 0, 0, 0, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1]
+        ]
+    app.angle = 0
 
-    # Start Menu Images
-    app.startMenuImage = app.loadImage('Start Menu Image.jpeg')
-    app.scaledStartMenu = app.scaleImage(app.startMenuImage, 2)
-    app.marioKart112 = app.loadImage('Mario Kart 112.png')
+def drawPlayer(app, canvas):
+    canvas.create_rectangle(app.cx-app.playerRadius, app.cy-app.playerRadius, 
+                            app.cx+app.playerRadius, app.cy+app.playerRadius, 
+                            fill='yellow')
+    canvas.create_line(app.cx, app.cy,
+                       app.cx + app.playerRadius**2*cos(app.angle), 
+                       app.cy - app.playerRadius**2*sin(app.angle),
+                       width=5, fill='yellow')
 
-    # Map Select Images
-    app.mushroomCupImage= app.loadImage('Mushroom Cup.jpeg')
-    app.mushroomCup = app.scaleImage(app.mushroomCupImage, 2/3)
-    app.starCupImage = app.loadImage('Star Cup.jpeg')
-    app.starCup = app.scaleImage(app.starCupImage, 2/3)
-    app.specialCupImage = app.loadImage('Special Cup.jpeg')
-    app.specialCup = app.scaleImage(app.specialCupImage, 2/3)
+def drawGrid(cellWidth, map, app, canvas):
+    for row in range(len(map)):
+        for col in range(len(map[0])):
+            canvas.create_rectangle(cellWidth * col, cellWidth * row,
+                                        cellWidth * (col+1), cellWidth*(row+1),
+                                        fill='dark gray', width=1)
+            if map[row][col] == 1:
+                canvas.create_rectangle(cellWidth * col, cellWidth * row,
+                                        cellWidth * (col+1), cellWidth*(row+1),
+                                        fill='white', width=1)
+                
 
-    # Character Select Images
-    app.mushroomCellImage = app.loadImage('Mushroom Grid Cell.jpeg')
-    app.singleMushroom = app.scaleImage(app.mushroomCellImage, 1/5)
-    app.starCellImage = app.loadImage('Star Grid Cell.jpeg')
-    app.singleStar = app.scaleImage(app.starCellImage, 1/5)
-    app.crownCellImage = app.loadImage('Crown Grid Cell.jpeg')
-    app.singleCrown = app.scaleImage(app.crownCellImage, 1/5)
-    app.characterSelect = app.loadImage('Character Select.jpeg')
-    app.characters = app.scaleImage(app.characterSelect, 3/2)
+def drawRays(app, canvas):
+    for _ in range(1):
+        dof = 0
+        if app.angle == 0 or app.angle == pi:
+            rx = app.cx
+            ry = app.cy
+            dof = 8
+        elif almostEqual(app.angle, pi/2, 0.001) or almostEqual(app.angle, pi*1.5, 0.001):
+            ry = app.cy//64*64
+            rx = app.cx
+            y0 = -64
+            x0 = 0
+        aTan = -1/tan(app.angle)
+        if app.angle < pi:
+            ry = app.cy//64*64
+            rx = int((app.cy-ry)*aTan+app.cx)
+            y0 = -64
+            x0 = int(-y0*aTan)
+        elif app.angle > pi:
+            ry = app.cy//64*64 + 64
+            rx = int((app.cy-ry)*aTan+app.cx)
+            y0 = 64
+            x0 = int(-y0*aTan)
+        while dof < 8:
+            mx = rx//64
+            my = ry//64
+            if mx < len(app.map[0]) and mx >= 0:
+                if my >= 0 and my < len(app.map):
+                    if app.map[my][mx] == 1:
+                        dof = 8
+                    else:
+                        rx += x0
+                        ry += y0
+                        dof += 1
+        canvas.create_line(app.cx, app.cy, rx, ry, fill='yellow', width=5)
 
-def startMenu_redrawAll(app, canvas):
-    canvas.create_image(app.cx, app.cy, 
-                        image=ImageTk.PhotoImage(app.scaledStartMenu))
-    canvas.create_image(app.cx, 100,
-                        image=ImageTk.PhotoImage(app.marioKart112))
-    canvas.create_text(app.cx, 300, text="Press any key to continue",
-                       font="impact 40 bold", fill='beige')
+def keyPressed(app, event):
+    if event.key == 'w':
+        dy = app.playerRadius*sin(app.angle)
+        dx = app.playerRadius*cos(app.angle)
+        app.cy -= dy
+        app.cx += dx
+    elif event.key == 's':
+        dy = app.playerRadius*sin(app.angle)
+        dx = app.playerRadius*cos(app.angle)
+        app.cy += dy
+        app.cx -= dx
+    elif event.key == 'Left':
+        app.angle += pi/32
+        if app.angle >= 2*pi:
+            app.angle -= 2*pi
+    elif event.key == 'Right':
+        app.angle -= pi/32
+        if app.angle <= -2*pi:
+            app.angle += 2*pi
 
-def startMenu_keyPressed(app, event):
-    app.mode = 'mapSelect'
+def timerFired(app):
+    pass
 
-def mapSelect_redrawAll(app, canvas):
-    canvas.create_rectangle(0, 0, app.width, app.height, fill='dodgerblue')
-    canvas.create_image(app.width*1/6, app.cy,
-                        image=ImageTk.PhotoImage(app.mushroomCup))
-    canvas.create_text(app.width*1/6, app.cy+85, text='Mushroom Cup',
-                       font='helvetica 17 bold', fill='navy blue')
-    canvas.create_image(app.cx, app.cy,
-                        image=ImageTk.PhotoImage(app.starCup))
-    canvas.create_text(app.cx, app.cy+85, text='Star Cup',
-                       font='helvetica 17 bold', fill='navy blue')
-    canvas.create_image(app.width*5/6, app.cy,
-                        image=ImageTk.PhotoImage(app.specialCup))
-    canvas.create_text(app.width*5/6, app.cy+85, text='Special Cup',
-                       font='helvetica 17 bold', fill='navy blue')
-    canvas.create_text(app.cx, 100, text='Click on the icon to select the map!',
-                       font='Impact 20', fill='yellow')
-    canvas.create_text(10, 10, text='<< Esc to go back', fill='black',
-                       font='impact 10', anchor='nw')
+def redrawAll(app, canvas):
+    canvas.create_rectangle(0, 0, app.width, app.height, fill='dark gray')
+    drawGrid(app.cellWidth, app.map, app, canvas)
+    drawPlayer(app, canvas)
+    # drawRays(app, canvas)
 
-def mapSelect_mousePressed(app, event):
-    if event.x >= 37 and event.x <= 187:
-        if event.y >= 150 and event.y <= 300:
-            app.mode = 'mushroomCup'
-    elif event.x >= 263 and event.x <= 413:
-        if event.y >= 150 and event.y <= 300:
-            app.mode = 'starCup'
-    elif event.x >= 488 and event.x <= 638:
-        if event.y >= 150 and event.y <= 300:
-            app.mode = 'specialCup'
-
-def mapSelect_keyPressed(app, event):
-    if event.key == 'Escape':
-        app.mode = 'startMenu'
-
-def mushroomCup_redrawAll(app, canvas):
-    margin = 45//2
-    for x in range(margin, app.width, 45):
-        for y in range(margin, app.height, 45):
-            canvas.create_image(x, y, 
-                                image=ImageTk.PhotoImage(app.singleMushroom))
-    canvas.create_image(app.cx, app.cy,
-                        image=ImageTk.PhotoImage(app.characters))
-
-def mushroomCup_keyPressed(app, event):
-    if event.key == 'Escape':
-        app.mode = 'mapSelect'
-
-def starCup_redrawAll(app, canvas):
-    margin = 45//2
-    for x in range(margin, app.width, 45):
-        for y in range(margin, app.height, 45):
-            canvas.create_image(x, y, 
-                                image=ImageTk.PhotoImage(app.singleStar))
-    canvas.create_image(app.cx, app.cy,
-                        image=ImageTk.PhotoImage(app.characters))
-
-def starCup_keyPressed(app, event):
-    if event.key == 'Escape':
-        app.mode = 'mapSelect'
-
-def specialCup_redrawAll(app, canvas):
-    margin = 45//2
-    for x in range(margin, app.width, 45):
-        for y in range(margin, app.height, 45):
-            canvas.create_image(x, y, 
-                                image=ImageTk.PhotoImage(app.singleCrown))
-    canvas.create_image(app.cx, app.cy,
-                        image=ImageTk.PhotoImage(app.characters))
-
-def specialCup_keyPressed(app, event):
-    if event.key == 'Escape':
-        app.mode = 'mapSelect'
-
-runApp(width=676, height=450)
+runApp(width=1024, height=512)
