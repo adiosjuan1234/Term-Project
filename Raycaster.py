@@ -39,6 +39,12 @@ def appStarted(app):
     app.angle = 0
     app.timerDelay = 20
 
+def drawBackground(app, canvas):
+    canvas.create_rectangle(0, 0, app.width, app.height/2,
+                            fill='sky blue',width=0)
+    canvas.create_rectangle(0, app.height/2, app.width, app.height,
+                            fill='dark gray', width=0)
+
 def drawPlayer(app, canvas):
     canvas.create_rectangle(app.cx-app.playerRadius, app.cy-app.playerRadius, 
                             app.cx+app.playerRadius, app.cy+app.playerRadius, 
@@ -272,7 +278,7 @@ def timerFired(app):
                 app.cx += dx
 
 def redrawAll(app, canvas):
-    canvas.create_rectangle(0, 0, app.width, app.height, fill='dark gray')
+    drawBackground(app, canvas)
     drawGrid(app.cellWidth, app.map, app, canvas)
     drawRays(app, canvas, 180)
     drawPlayer(app, canvas)
