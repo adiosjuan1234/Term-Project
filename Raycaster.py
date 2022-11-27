@@ -14,20 +14,20 @@ def roundHalfUp(d):
     return int(decimal.Decimal(d).to_integral_value(rounding=rounding))
 
 def appStarted(app):
-    app.cx = 32
-    app.cy = 32
-    app.playerRadius = 5
+    app.playerRadius = 1.5
+    app.speed = app.playerRadius*0.6
+    app.playerHitbox = 5
     app.map = [
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
             [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
-            [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            [0,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1],
-            [0,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1],
-            [0,0,1,0,0,0,0,0,0,0,0,1,1,1,1,1],
-            [0,0,1,0,0,0,0,0,0,0,0,0,1,1,1,1],
-            [0,0,1,1,1,1,1,1,1,0,0,0,0,1,1,1],
+            [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
+            [0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,1],
+            [0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,1],
+            [0,0,1,1,0,0,0,0,0,0,0,0,1,1,1,1],
+            [0,0,1,1,0,0,0,0,0,0,0,0,0,1,1,1],
             [0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,1],
             [0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,1],
             [0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0],
@@ -35,7 +35,9 @@ def appStarted(app):
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         ]
-    app.cellWidth = app.height/len(app.map)
+    app.cellWidth = 8
+    app.cx = app.cellWidth/2
+    app.cy = app.cellWidth/2
     app.angle = 0
     app.timerDelay = 20
 
@@ -50,9 +52,9 @@ def drawPlayer(app, canvas):
                             app.cx+app.playerRadius, app.cy+app.playerRadius, 
                             fill='yellow')
     canvas.create_line(app.cx, app.cy,
-                       app.cx + app.playerRadius**2*math.cos(app.angle), 
-                       app.cy - app.playerRadius**2*math.sin(app.angle),
-                       width=5, fill='yellow')
+                       app.cx + app.playerHitbox*math.cos(app.angle), 
+                       app.cy - app.playerHitbox*math.sin(app.angle),
+                       width=2, fill='yellow')
 
 def drawGrid(cellWidth, map, app, canvas):
     for row in range(len(map)):
@@ -170,7 +172,7 @@ def getVerticalRayEnd(app, angle, px, py, map):
                 dof += 1
     return rx, ry
 
-def drawRays(app, canvas, numDeg):
+def drawRays3D(app, canvas, numDeg):
     distFinal = 0
     
     for x in range(numDeg+1):
@@ -188,45 +190,41 @@ def drawRays(app, canvas, numDeg):
         distH = rayDist(app.cx, app.cy, hx, hy)
         distV = rayDist(app.cx, app.cy, vx, vy)
 
-        # Draw the ray with the shortest distance
+        # Find the ray with the shortest distance and set it equal to distFinal
         if distH == 0:
             distFinal = distV
-            canvas.create_line(app.cx, app.cy, vx, vy, fill='lime', width=1)
         elif distV == 0:
             distFinal = distH
-            canvas.create_line(app.cx, app.cy, hx, hy, fill='lime', width=1)
         elif distV < distH:
             distFinal = distV
-            canvas.create_line(app.cx, app.cy, vx, vy, fill='lime', width=1)
         elif distH < distV:
             distFinal = distH
-            canvas.create_line(app.cx, app.cy, hx, hy, fill='lime', width=1)
 
+        # multiply by cos(angleDiff) to remove fish-eye effect
         distFinal = distFinal * math.cos(angleDiff)
+
+        # 3D line height formula
         lineHeight = app.cellWidth*app.height/distFinal
         if lineHeight > app.height:
             lineHeight = app.height
 
-        newX0 = len(app.map)*app.cellWidth
-        xCoord = app.width - newX0/numDeg*x
+        # 3D line coordinate + offset from top of screen
+        xCoord = app.width - app.width/numDeg*x
         lineOffset = app.height/2-lineHeight/2
 
+        # draw the rays
         if distH == 0:
-            distFinal = distV
             canvas.create_line(xCoord, lineOffset, xCoord, lineOffset+lineHeight,
-                           width=newX0/numDeg, fill='lime')
+                           width=app.width/numDeg, fill='lime')
         elif distV == 0:
-            distFinal = distH
             canvas.create_line(xCoord, lineOffset, xCoord, lineOffset+lineHeight,
-                           width=newX0/numDeg, fill='green')
+                           width=app.width/numDeg, fill='green')
         elif distV < distH:
-            distFinal = distV
             canvas.create_line(xCoord, lineOffset, xCoord, lineOffset+lineHeight,
-                           width=newX0/numDeg, fill='lime')
+                           width=app.width/numDeg, fill='lime')
         elif distH < distV:
-            distFinal = distH
             canvas.create_line(xCoord, lineOffset, xCoord, lineOffset+lineHeight,
-                           width=newX0/numDeg, fill='green')
+                           width=app.width/numDeg, fill='green')
 
 def keyPressed(app, event):
     dy = app.playerRadius*math.sin(app.angle)
@@ -251,36 +249,32 @@ def keyPressed(app, event):
                 if app.map[tempMy][tempMx] == 0:
                     app.cy += dy
                     app.cx -= dx
-    elif event.key == 'a':
-        pass
-    elif event.key == 'd':
-        pass
     elif event.key == 'Left':
-        if app.angle + 0.05 >= 2*math.pi:
+        if app.angle + 0.04 >= 2*math.pi:
             app.angle -= 2*math.pi
-        app.angle += 0.05
+        app.angle += 0.04
     elif event.key == 'Right':
-        if app.angle - 0.05 < 0:
+        if app.angle - 0.04 < 0:
             app.angle += 2*math.pi
-        app.angle -= 0.05
+        app.angle -= 0.04
 
 def timerFired(app):
-    dy = 4*math.sin(app.angle)
-    dx = 4*math.cos(app.angle)
-    tempMy = roundHalfUp((app.cy - dy)//app.cellWidth)
-    tempMx = roundHalfUp((app.cx + dx)//app.cellWidth)
-    tempCx = app.cx + dx
-    tempCy = app.cy - dy
+    dy = app.speed*math.sin(app.angle)
+    dx = app.speed*math.cos(app.angle)
+    tempCx = app.cx + app.playerHitbox*math.cos(app.angle)
+    tempCy = app.cy - app.playerHitbox*math.sin(app.angle)
+    tempMy = roundHalfUp((tempCy)//app.cellWidth)
+    tempMx = roundHalfUp((tempCx)//app.cellWidth)
     if tempCx > 0 and tempCx < app.cellWidth*len(app.map):
-        if tempCy > 0 and tempCy < app.height:
+        if tempCy > 0 and tempCy < app.cellWidth*len(app.map):
             if app.map[tempMy][tempMx] == 0:
                 app.cy -= dy
                 app.cx += dx
 
 def redrawAll(app, canvas):
     drawBackground(app, canvas)
+    drawRays3D(app, canvas, 180)
     drawGrid(app.cellWidth, app.map, app, canvas)
-    drawRays(app, canvas, 180)
     drawPlayer(app, canvas)
 
-runApp(width=1024, height=512)
+runApp(width=676, height=450)
