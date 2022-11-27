@@ -55,22 +55,22 @@ def appStarted(app):
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         ]
     app.map2 = [
-            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
-            [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
-            [0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
-            [0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
-            [0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,1],
-            [0,0,1,1,0,0,1,1,1,1,1,1,1,1,1,1],
-            [0,0,1,1,0,0,0,0,0,0,0,0,1,1,1,1],
-            [0,0,1,1,0,0,0,0,0,0,0,0,0,1,1,1],
-            [0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,1],
-            [0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,1],
-            [0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0],
-            [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            [0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,1,0,1,1,1,0,0,0,0,0],
+            [0,0,1,1,1,0,1,0,0,0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,1,1,1,1,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0],
+            [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0],
+            [1,0,0,0,1,1,1,1,1,1,1,1,0,0,0,1],
+            [1,1,0,0,0,1,1,1,1,1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1,1,1,1,1,0,0,0,1,1],
+            [1,0,0,0,1,1,1,1,1,1,1,1,0,0,0,1],
+            [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0],
+            [0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,1,1,1,1,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0,0,0,1,0,1,1,1,0,0],
+            [0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0]
         ]
     app.map3 = [
             [0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -97,8 +97,8 @@ def appStarted(app):
     app.speed = app.playerRadius*0.6
     app.playerHitbox = 5
     app.cellWidth = 8
-    app.px = app.cellWidth/2
-    app.py = app.cellWidth/2
+    app.px = app.cellWidth//2
+    app.py = app.cellWidth//2
     app.angle = 0
     app.timerDelay = 20
 
@@ -442,7 +442,7 @@ def getVerticalRayEnd(app, angle, px, py, map):
                 dof += 1
     return rx, ry
 
-def raceMode_drawRays3D(app, canvas, numDeg):
+def drawRays3D(app, canvas, numDeg):
     distFinal = 0
     
     for x in range(numDeg+1):
@@ -500,8 +500,8 @@ def raceMode_keyPressed(app, event):
     dy = app.speed*math.sin(app.angle)
     dx = app.speed*math.cos(app.angle)
     if event.key == 'w':
-        tempCx = app.cx + app.playerHitbox*math.cos(app.angle)
-        tempCy = app.cy - app.playerHitbox*math.sin(app.angle)
+        tempCx = app.px + app.playerHitbox*math.cos(app.angle)
+        tempCy = app.py - app.playerHitbox*math.sin(app.angle)
         tempMy = roundHalfUp((tempCy)//app.cellWidth)
         tempMx = roundHalfUp((tempCx)//app.cellWidth)
         if tempCx > 0 and tempCx < app.cellWidth*len(app.selectedMap):
@@ -509,9 +509,9 @@ def raceMode_keyPressed(app, event):
                 if app.selectedMap[tempMy][tempMx] == 0:
                     app.py -= dy
                     app.px += dx
-    if event.key == 's':
-        tempCx = app.cx + app.playerHitbox*math.cos(app.angle)
-        tempCy = app.cy - app.playerHitbox*math.sin(app.angle)
+    elif event.key == 's':
+        tempCx = app.px - app.playerHitbox*math.cos(app.angle)
+        tempCy = app.py + app.playerHitbox*math.sin(app.angle)
         tempMy = roundHalfUp((tempCy)//app.cellWidth)
         tempMx = roundHalfUp((tempCx)//app.cellWidth)
         if tempCx > 0 and tempCx < app.cellWidth*len(app.selectedMap):
@@ -543,7 +543,7 @@ def raceMode_timerFired(app):
 
 def raceMode_redrawAll(app, canvas):
     drawBackground(app, canvas)
-    raceMode_drawRays3D(app, canvas, 180)
+    drawRays3D(app, canvas, 180)
     drawGrid(app.cellWidth, app.selectedMap, canvas)
     drawPlayer(app, canvas)
 
