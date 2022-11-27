@@ -56,7 +56,7 @@ def drawPlayer(app, canvas):
                        app.cy - app.playerHitbox*math.sin(app.angle),
                        width=2, fill='yellow')
 
-def drawGrid(cellWidth, map, app, canvas):
+def drawGrid(cellWidth, map, canvas):
     for row in range(len(map)):
         for col in range(len(map[0])):
             canvas.create_rectangle(cellWidth * col, cellWidth * row,
@@ -227,23 +227,23 @@ def drawRays3D(app, canvas, numDeg):
                            width=app.width/numDeg, fill='green')
 
 def keyPressed(app, event):
-    dy = app.playerRadius*math.sin(app.angle)
-    dx = app.playerRadius*math.cos(app.angle)
+    dy = app.speed*math.sin(app.angle)
+    dx = app.speed*math.cos(app.angle)
     if event.key == 'w':
-        tempMy = roundHalfUp((app.cy - dy)//app.cellWidth)
-        tempMx = roundHalfUp((app.cx + dx)//app.cellWidth)
-        tempCx = app.cx + dx
-        tempCy = app.cy - dy
+        tempCx = app.cx + app.playerHitbox*math.cos(app.angle)
+        tempCy = app.cy - app.playerHitbox*math.sin(app.angle)
+        tempMy = roundHalfUp((tempCy)//app.cellWidth)
+        tempMx = roundHalfUp((tempCx)//app.cellWidth)
         if tempCx > 0 and tempCx < app.cellWidth*len(app.map):
             if tempCy > 0 and tempCy < app.height:
                 if app.map[tempMy][tempMx] == 0:
                     app.cy -= dy
                     app.cx += dx
     if event.key == 's':
-        tempMy = roundHalfUp((app.cy + dy)//app.cellWidth)
-        tempMx = roundHalfUp((app.cx - dx)//app.cellWidth)
-        tempCx = app.cx - dx
-        tempCy = app.cy + dy
+        tempCx = app.cx + app.playerHitbox*math.cos(app.angle)
+        tempCy = app.cy - app.playerHitbox*math.sin(app.angle)
+        tempMy = roundHalfUp((tempCy)//app.cellWidth)
+        tempMx = roundHalfUp((tempCx)//app.cellWidth)
         if tempCx > 0 and tempCx < app.cellWidth*len(app.map):
             if tempCy > 0 and tempCy < app.height:
                 if app.map[tempMy][tempMx] == 0:
@@ -274,7 +274,7 @@ def timerFired(app):
 def redrawAll(app, canvas):
     drawBackground(app, canvas)
     drawRays3D(app, canvas, 180)
-    drawGrid(app.cellWidth, app.map, app, canvas)
+    drawGrid(app.cellWidth, app.map, canvas)
     drawPlayer(app, canvas)
 
 runApp(width=676, height=450)
