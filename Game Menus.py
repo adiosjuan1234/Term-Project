@@ -100,7 +100,7 @@ def appStarted(app):
     app.px = app.cellWidth//2
     app.py = app.cellWidth//2
     app.angle = 0
-    app.timerDelay = 20
+    app.timerDelay = 16
 
 def startMenu_redrawAll(app, canvas):
     canvas.create_image(app.cx, app.cy, 
