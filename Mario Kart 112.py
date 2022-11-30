@@ -19,7 +19,7 @@ def appStarted(app):
 
     # Start Menu Images
     app.startMenuImage = app.loadImage('Start Menu Image.jpeg')
-    app.scaledStartMenu = app.scaleImage(app.startMenuImage, 2)
+    app.scaledStartMenu = app.scaleImage(app.startMenuImage, 2.5)
     app.marioKart112 = app.loadImage('Mario Kart 112.png')
 
     # Map Select Images
@@ -100,9 +100,9 @@ def appStarted(app):
 
     # Racer + Track properties
     app.playerRadius = 1.5
-    app.speed = app.playerRadius*0.4
-    app.playerHitbox = 5
-    app.cellWidth = 10
+    app.speed = app.playerRadius
+    app.playerHitbox = 8
+    app.cellWidth = 32
     app.px = app.cellWidth//2
     app.py = app.cellWidth//2
     app.angle = 0
@@ -143,6 +143,7 @@ def appStarted(app):
 
 def startMenu_redrawAll(app, canvas):
     # Create background
+    canvas.create_rectangle(0, 0, app.width, app.height, fill='navy')
     canvas.create_image(app.cx, app.cy, 
                         image=ImageTk.PhotoImage(app.scaledStartMenu))
     canvas.create_image(app.cx, 100,
@@ -180,14 +181,16 @@ def mapSelect_redrawAll(app, canvas):
 
 def mapSelect_mousePressed(app, event):
     # Create buttons for each map
-    if event.x >= 37 and event.x <= 187:
-        if event.y >= 150 and event.y <= 300:
+    cupWidth, _ = app.mushroomCup.size
+    imageRadius = cupWidth/2
+    if event.x >= app.width*1/6 - imageRadius and event.x <= app.width*1/6 + imageRadius:
+        if event.y >= app.cy - imageRadius and event.y <= app.cy + imageRadius:
             app.mode = 'mushroomCup'
-    elif event.x >= 263 and event.x <= 413:
-        if event.y >= 150 and event.y <= 300:
+    elif event.x >= app.cx - imageRadius and event.x <= app.cx + imageRadius:
+        if event.y >= app.cy - imageRadius and event.y <= app.cy + imageRadius:
             app.mode = 'starCup'
-    elif event.x >= 488 and event.x <= 638:
-        if event.y >= 150 and event.y <= 300:
+    elif event.x >= app.width*5/6 - imageRadius and event.x <= app.width*5/6 + imageRadius:
+        if event.y >= app.cy - imageRadius and event.y <= app.cy + imageRadius:
             app.mode = 'specialCup'
 
 def mapSelect_keyPressed(app, event):
@@ -216,39 +219,46 @@ def mushroomCup_keyPressed(app, event):
 
 def mushroomCup_mousePressed(app, event):
     # Create buttons for each character
-    if event.x >= 48 and event.x <= 181:
-        if event.y >= 68 and event.y <= 217:
+    charWidth, charHeight = app.characters.size
+    margin = 13
+    x0 = (app.width - charWidth)*1/2 + margin
+    y0 = (app.height - charHeight)*1/2 + margin
+    charCellX = (charWidth - margin*5)/4
+    charCellY = (charHeight - margin*3)/2
+
+    if event.x >= x0 and event.x <= x0 + charCellX:
+        if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'mario'
             app.selectedMap = app.map1
             app.mode = 'raceMode'
-        elif event.y >= 232 and event.y <= 382:
+        elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'yoshi'
             app.selectedMap = app.map1
             app.mode = 'raceMode'
-    elif event.x >= 196 and event.x <= 329:
-        if event.y >= 68 and event.y <= 217:
+    elif event.x >= x0+charCellX+margin and event.x <= x0+2*charCellX+margin:
+        if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'luigi'
             app.selectedMap = app.map1
             app.mode = 'raceMode'
-        elif event.y >= 232 and event.y <= 382:
+        elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'donkeykong'
             app.selectedMap = app.map1
             app.mode = 'raceMode'
-    elif event.x >= 344 and event.x <= 477:
-        if event.y >= 68 and event.y <= 217:
+    elif event.x >= x0+2*charCellX+2*margin and event.x <= x0+3*charCellX+2*margin:
+        if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'peach'
             app.selectedMap = app.map1
             app.mode = 'raceMode'
-        elif event.y >= 232 and event.y <= 382:
+        elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'wario'
             app.selectedMap = app.map1
             app.mode = 'raceMode'
-    elif event.x >= 492 and event.x <= 625:
-        if event.y >= 68 and event.y <= 217:
+    elif event.x >= x0+3*charCellX+3*margin and event.x <= x0+4*charCellX+3*margin:
+        if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'toad'
             app.selectedMap = app.map1
             app.mode = 'raceMode'
-        elif event.y >= 232 and event.y <= 382:
+        elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'bowser'
             app.selectedMap = app.map1
             app.mode = 'raceMode'
@@ -267,39 +277,46 @@ def starCup_keyPressed(app, event):
         app.mode = 'mapSelect'
 
 def starCup_mousePressed(app, event):
-    if event.x >= 48 and event.x <= 181:
-        if event.y >= 68 and event.y <= 217:
+    charWidth, charHeight = app.characters.size
+    margin = 13
+    x0 = (app.width - charWidth)*1/2 + margin
+    y0 = (app.height - charHeight)*1/2 + margin
+    charCellX = (charWidth - margin*5)/4
+    charCellY = (charHeight - margin*3)/2
+    
+    if event.x >= x0 and event.x <= x0 + charCellX:
+        if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'mario'
             app.selectedMap = app.map2
             app.mode = 'raceMode'
-        elif event.y >= 232 and event.y <= 382:
+        elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'yoshi'
             app.selectedMap = app.map2
             app.mode = 'raceMode'
-    elif event.x >= 196 and event.x <= 329:
-        if event.y >= 68 and event.y <= 217:
+    elif event.x >= x0+charCellX+margin and event.x <= x0+2*charCellX+margin:
+        if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'luigi'
             app.selectedMap = app.map2
             app.mode = 'raceMode'
-        elif event.y >= 232 and event.y <= 382:
+        elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'donkeykong'
             app.selectedMap = app.map2
             app.mode = 'raceMode'
-    elif event.x >= 344 and event.x <= 477:
-        if event.y >= 68 and event.y <= 217:
+    elif event.x >= x0+2*charCellX+2*margin and event.x <= x0+3*charCellX+2*margin:
+        if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'peach'
             app.selectedMap = app.map2
             app.mode = 'raceMode'
-        elif event.y >= 232 and event.y <= 382:
+        elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'wario'
             app.selectedMap = app.map2
             app.mode = 'raceMode'
-    elif event.x >= 492 and event.x <= 625:
-        if event.y >= 68 and event.y <= 217:
+    elif event.x >= x0+3*charCellX+3*margin and event.x <= x0+4*charCellX+3*margin:
+        if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'toad'
             app.selectedMap = app.map2
             app.mode = 'raceMode'
-        elif event.y >= 232 and event.y <= 382:
+        elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'bowser'
             app.selectedMap = app.map2
             app.mode = 'raceMode'
@@ -318,39 +335,46 @@ def specialCup_keyPressed(app, event):
         app.mode = 'mapSelect'
 
 def specialCup_mousePressed(app, event):
-    if event.x >= 48 and event.x <= 181:
-        if event.y >= 68 and event.y <= 217:
+    charWidth, charHeight = app.characters.size
+    margin = 13
+    x0 = (app.width - charWidth)*1/2 + margin
+    y0 = (app.height - charHeight)*1/2 + margin
+    charCellX = (charWidth - margin*5)/4
+    charCellY = (charHeight - margin*3)/2
+    
+    if event.x >= x0 and event.x <= x0 + charCellX:
+        if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'mario'
             app.selectedMap = app.map3
             app.mode = 'raceMode'
-        elif event.y >= 232 and event.y <= 382:
+        elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'yoshi'
             app.selectedMap = app.map3
             app.mode = 'raceMode'
-    elif event.x >= 196 and event.x <= 329:
-        if event.y >= 68 and event.y <= 217:
+    elif event.x >= x0+charCellX+margin and event.x <= x0+2*charCellX+margin:
+        if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'luigi'
             app.selectedMap = app.map3
             app.mode = 'raceMode'
-        elif event.y >= 232 and event.y <= 382:
+        elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'donkeykong'
             app.selectedMap = app.map3
             app.mode = 'raceMode'
-    elif event.x >= 344 and event.x <= 477:
-        if event.y >= 68 and event.y <= 217:
+    elif event.x >= x0+2*charCellX+2*margin and event.x <= x0+3*charCellX+2*margin:
+        if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'peach'
             app.selectedMap = app.map3
             app.mode = 'raceMode'
-        elif event.y >= 232 and event.y <= 382:
+        elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'wario'
             app.selectedMap = app.map3
             app.mode = 'raceMode'
-    elif event.x >= 492 and event.x <= 625:
-        if event.y >= 68 and event.y <= 217:
+    elif event.x >= x0+3*charCellX+3*margin and event.x <= x0+4*charCellX+3*margin:
+        if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'toad'
             app.selectedMap = app.map3
             app.mode = 'raceMode'
-        elif event.y >= 232 and event.y <= 382:
+        elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'bowser'
             app.selectedMap = app.map3
             app.mode = 'raceMode'
@@ -373,7 +397,7 @@ def drawBackground(app, canvas):
     canvas.create_rectangle(0, 0, app.width, app.height/2,
                             fill='sky blue',width=0)
     canvas.create_rectangle(0, app.height/2, app.width, app.height,
-                            fill='black', width=0)
+                            fill='brown', width=0)
 
 def drawPlayer(app, canvas):
     # draw the selected character on the 2D track
@@ -544,7 +568,7 @@ def drawRays3D(app, canvas, numDeg):
             lineHeight = app.height
 
         # 3D line coordinate + offset from top of screen
-        xCoord = app.width - app.width/numDeg*x
+        xCoord = app.width - (app.width - app.cellWidth*len(app.map1))/numDeg*x
         lineOffset = app.height/2-lineHeight/2
 
         # draw the rays
@@ -618,4 +642,4 @@ def raceMode_redrawAll(app, canvas):
     drawGrid(app.cellWidth, app.selectedMap, canvas)
     drawPlayer(app, canvas)
 
-runApp(width=676, height=450)
+runApp(width=1332, height=512)
