@@ -617,13 +617,13 @@ def raceMode_keyPressed(app, event):
 
     # Pan Left and Right
     elif event.key == 'Left':
-        if app.angle + 0.04 >= 2*math.pi:
+        if app.angle + 0.05 >= 2*math.pi:
             app.angle -= 2*math.pi
-        app.angle += 0.04
+        app.angle += 0.05
     elif event.key == 'Right':
-        if app.angle - 0.04 < 0:
+        if app.angle - 0.05 < 0:
             app.angle += 2*math.pi
-        app.angle -= 0.04
+        app.angle -= 0.05
 
 def raceMode_timerFired(app):
     # Move forwards constantly
