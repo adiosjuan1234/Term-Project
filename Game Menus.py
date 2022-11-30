@@ -94,13 +94,42 @@ def appStarted(app):
 
     # Race things
     app.playerRadius = 1.5
-    app.speed = app.playerRadius*0.6
+    app.speed = app.playerRadius*0.4
     app.playerHitbox = 5
-    app.cellWidth = 8
+    app.cellWidth = 10
     app.px = app.cellWidth//2
     app.py = app.cellWidth//2
     app.angle = 0
-    app.timerDelay = 16
+    app.timerDelay = 10
+
+    # Characters
+    app.karts = dict()
+    app.marioImage = app.loadImage('Mario.png')
+    app.mario = app.scaleImage(app.marioImage, 1/10)
+    app.karts['mario'] = app.mario
+    app.luigiImage = app.loadImage('Luigi.png')
+    app.luigi = app.scaleImage(app.luigiImage, 1/10)
+    app.karts['luigi'] = app.luigi
+    app.peachImage = app.loadImage('Peach.png')
+    app.peach = app.scaleImage(app.peachImage, 1/10)
+    app.karts['peach'] = app.peach
+    app.toadImage = app.loadImage('Toad.png')
+    app.toad = app.scaleImage(app.toadImage, 1/10)
+    app.karts['toad'] = app.toad
+    app.yoshiImage = app.loadImage('Yoshi.png')
+    app.yoshi = app.scaleImage(app.yoshiImage, 1/10)
+    app.karts['yoshi'] = app.yoshi
+    app.dkImage = app.loadImage('Donkey Kong.png')
+    app.dk = app.scaleImage(app.dkImage, 1/10)
+    app.karts['donkeykong'] = app.dk
+    app.warioImage = app.loadImage('Wario.png')
+    app.wario = app.scaleImage(app.warioImage, 1/10)
+    app.karts['wario'] = app.wario
+    app.bowserImage = app.loadImage('Bowser.png')
+    app.bowser = app.scaleImage(app.bowserImage, 1/10)
+    app.karts['bowser'] = app.bowser
+
+# Menu credit: https://www.cs.cmu.edu/~112/notes/notes-animations-part4.html#usingModes
 
 def startMenu_redrawAll(app, canvas):
     canvas.create_image(app.cx, app.cy, 
@@ -315,16 +344,12 @@ def drawBackground(app, canvas):
     canvas.create_rectangle(0, 0, app.width, app.height/2,
                             fill='sky blue',width=0)
     canvas.create_rectangle(0, app.height/2, app.width, app.height,
-                            fill='dark gray', width=0)
+                            fill='black', width=0)
 
 def drawPlayer(app, canvas):
-    canvas.create_rectangle(app.px-app.playerRadius, app.py-app.playerRadius, 
-                            app.px+app.playerRadius, app.py+app.playerRadius, 
-                            fill='yellow')
-    canvas.create_line(app.px, app.py,
-                       app.px + app.playerHitbox*math.cos(app.angle), 
-                       app.py - app.playerHitbox*math.sin(app.angle),
-                       width=2, fill='yellow')
+    kart = app.karts[app.selectedCharacter]
+    canvas.create_image(app.px, app.py, 
+                        image=ImageTk.PhotoImage(kart))
 
 def drawGrid(cellWidth, map, canvas):
     for row in range(len(map)):
@@ -336,6 +361,8 @@ def drawGrid(cellWidth, map, canvas):
                 canvas.create_rectangle(cellWidth * col, cellWidth * row,
                                         cellWidth * (col+1), cellWidth*(row+1),
                                         fill='white', width=0)
+
+# Raycasting credit: https://www.youtube.com/watch?v=gYRrGTC7GtA
 
 def rayDist(cx, cy, rx, ry):
     return math.sqrt((rx-cx)**2 + (ry-cy)**2)
@@ -529,6 +556,7 @@ def raceMode_keyPressed(app, event):
         app.angle -= 0.04
 
 def raceMode_timerFired(app):
+    # Move forwards
     dy = app.speed*math.sin(app.angle)
     dx = app.speed*math.cos(app.angle)
     tempCx = app.px + app.playerHitbox*math.cos(app.angle)
