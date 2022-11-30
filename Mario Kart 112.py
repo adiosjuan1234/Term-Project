@@ -586,6 +586,9 @@ def drawRays3D(app, canvas, numDeg):
                            width=app.width/numDeg, fill='green')
 
 def raceMode_keyPressed(app, event):
+    # Move forwards at the same time
+    raceMode_timerFired(app)
+
     # Speed x and y components
     dy = app.speed*math.sin(app.angle)
     dx = app.speed*math.cos(app.angle)
