@@ -2,6 +2,10 @@ from cmu_112_graphics import *
 import math
 import decimal
 
+######################################
+# appStarted: Declare global variables
+######################################
+
 def appStarted(app):
 
     # Open up the window with the start menu
@@ -10,6 +14,8 @@ def appStarted(app):
     # Canvas center coords for convenience
     app.cx = app.width/2
     app.cy = app.height/2
+
+    # Image credit: https://www.cs.cmu.edu/~112/notes/notes-animations-part4.html#loadImageUsingUrl
 
     # Start Menu Images
     app.startMenuImage = app.loadImage('Start Menu Image.jpeg')
@@ -92,7 +98,7 @@ def appStarted(app):
         ]
     app.selectedMap = [[]]
 
-    # Race things
+    # Racer + Track properties
     app.playerRadius = 1.5
     app.speed = app.playerRadius*0.4
     app.playerHitbox = 5
@@ -102,7 +108,7 @@ def appStarted(app):
     app.angle = 0
     app.timerDelay = 10
 
-    # Characters
+    # Character Karts
     app.karts = dict()
     app.marioImage = app.loadImage('Mario.png')
     app.mario = app.scaleImage(app.marioImage, 1/10)
@@ -131,7 +137,12 @@ def appStarted(app):
 
 # Menu credit: https://www.cs.cmu.edu/~112/notes/notes-animations-part4.html#usingModes
 
+######################################
+# Start Menu
+######################################
+
 def startMenu_redrawAll(app, canvas):
+    # Create background
     canvas.create_image(app.cx, app.cy, 
                         image=ImageTk.PhotoImage(app.scaledStartMenu))
     canvas.create_image(app.cx, 100,
@@ -140,9 +151,15 @@ def startMenu_redrawAll(app, canvas):
                        font="impact 40 bold", fill='beige')
 
 def startMenu_keyPressed(app, event):
+    # Press any key to continue
     app.mode = 'mapSelect'
 
+######################################
+# Map Select Menu
+######################################
+
 def mapSelect_redrawAll(app, canvas):
+    # Draw the buttons for each map
     canvas.create_rectangle(0, 0, app.width, app.height, fill='dodgerblue')
     canvas.create_image(app.width*1/6, app.cy,
                         image=ImageTk.PhotoImage(app.mushroomCup))
@@ -162,6 +179,7 @@ def mapSelect_redrawAll(app, canvas):
                        font='impact 10', anchor='nw')
 
 def mapSelect_mousePressed(app, event):
+    # Create buttons for each map
     if event.x >= 37 and event.x <= 187:
         if event.y >= 150 and event.y <= 300:
             app.mode = 'mushroomCup'
@@ -173,10 +191,16 @@ def mapSelect_mousePressed(app, event):
             app.mode = 'specialCup'
 
 def mapSelect_keyPressed(app, event):
+    # Escape to go back
     if event.key == 'Escape':
         app.mode = 'startMenu'
 
+######################################
+# Mushroom Cup Menu
+######################################
+
 def mushroomCup_redrawAll(app, canvas):
+    # Draw the character select options
     margin = 45//2
     for x in range(margin, app.width, 45):
         for y in range(margin, app.height, 45):
@@ -186,10 +210,12 @@ def mushroomCup_redrawAll(app, canvas):
                         image=ImageTk.PhotoImage(app.characters))
 
 def mushroomCup_keyPressed(app, event):
+    # Escape to go back
     if event.key == 'Escape':
         app.mode = 'mapSelect'
 
 def mushroomCup_mousePressed(app, event):
+    # Create buttons for each character
     if event.x >= 48 and event.x <= 181:
         if event.y >= 68 and event.y <= 217:
             app.selectedCharacter = 'mario'
@@ -329,29 +355,34 @@ def specialCup_mousePressed(app, event):
             app.selectedMap = app.map3
             app.mode = 'raceMode'
 
+######################################
+# Raycasting
+######################################
+
 def almostEqual(d1, d2, epsilon=10**-7):
-    # note: use math.isclose() outside 15-112 with Python version 3.5 or later
     return (abs(d2 - d1) < epsilon)
+    # Credit: Previous 112 homeworks
 
 def roundHalfUp(d):
-    # Round to nearest with ties going away from zero.
     rounding = decimal.ROUND_HALF_UP
-    # See other rounding options here:
-    # https://docs.python.org/3/library/decimal.html#rounding-modes
     return int(decimal.Decimal(d).to_integral_value(rounding=rounding))
+    # Credit: Previous 112 homeworks
 
 def drawBackground(app, canvas):
+    # draw the sky and road
     canvas.create_rectangle(0, 0, app.width, app.height/2,
                             fill='sky blue',width=0)
     canvas.create_rectangle(0, app.height/2, app.width, app.height,
                             fill='black', width=0)
 
 def drawPlayer(app, canvas):
+    # draw the selected character on the 2D track
     kart = app.karts[app.selectedCharacter]
     canvas.create_image(app.px, app.py, 
                         image=ImageTk.PhotoImage(kart))
 
 def drawGrid(cellWidth, map, canvas):
+    # draw the 2D track
     for row in range(len(map)):
         for col in range(len(map[0])):
             canvas.create_rectangle(cellWidth * col, cellWidth * row,
@@ -365,12 +396,16 @@ def drawGrid(cellWidth, map, canvas):
 # Raycasting credit: https://www.youtube.com/watch?v=gYRrGTC7GtA
 
 def rayDist(cx, cy, rx, ry):
+    # Pythagorean Theorem Distance Formula
     return math.sqrt((rx-cx)**2 + (ry-cy)**2)
 
 def getHorizontalRayEnd(app, angle, px, py, map):
+    # Keep extending by one horizontal gridline until the ray reaches a wall
     dof = 0
     maxDof = len(map)
     rx, ry = px, py
+
+    # Looking left or right
     if almostEqual(angle, 0, 10**-3) or almostEqual(angle, math.pi, 10**-3):
         dof = maxDof
     else:
@@ -418,9 +453,12 @@ def getHorizontalRayEnd(app, angle, px, py, map):
     return rx, ry
 
 def getVerticalRayEnd(app, angle, px, py, map):
+    # Keep extending by one vertical gridline until the ray reaches a wall
     dof = 0
     maxDof = len(map)
     rx, ry = px, py
+
+    # Looking up or down
     if almostEqual(angle, math.pi/2, 10**-3) or almostEqual(angle, math.pi*1.5, 10**-3):
         rx = px
         ry = py
@@ -524,8 +562,11 @@ def drawRays3D(app, canvas, numDeg):
                            width=app.width/numDeg, fill='green')
 
 def raceMode_keyPressed(app, event):
+    # Speed x and y components
     dy = app.speed*math.sin(app.angle)
     dx = app.speed*math.cos(app.angle)
+
+    # Speed up + Move backwards
     if event.key == 'w':
         tempCx = app.px + app.playerHitbox*math.cos(app.angle)
         tempCy = app.py - app.playerHitbox*math.sin(app.angle)
@@ -546,6 +587,8 @@ def raceMode_keyPressed(app, event):
                 if app.selectedMap[tempMy][tempMx] == 0:
                     app.py += dy
                     app.px -= dx
+
+    # Pan Left and Right
     elif event.key == 'Left':
         if app.angle + 0.04 >= 2*math.pi:
             app.angle -= 2*math.pi
@@ -556,7 +599,7 @@ def raceMode_keyPressed(app, event):
         app.angle -= 0.04
 
 def raceMode_timerFired(app):
-    # Move forwards
+    # Move forwards constantly
     dy = app.speed*math.sin(app.angle)
     dx = app.speed*math.cos(app.angle)
     tempCx = app.px + app.playerHitbox*math.cos(app.angle)
