@@ -586,8 +586,6 @@ def drawRays3D(app, canvas, numDeg):
                            width=app.width/numDeg, fill='green')
 
 def raceMode_keyPressed(app, event):
-    # Move forwards at the same time
-    raceMode_timerFired(app)
 
     # Speed x and y components
     dy = app.speed*math.sin(app.angle)
@@ -595,6 +593,10 @@ def raceMode_keyPressed(app, event):
 
     # Speed up + Move backwards
     if event.key == 'w':
+
+        # Move forwards at the same time
+        raceMode_timerFired(app)
+
         tempCx = app.px + app.playerHitbox*math.cos(app.angle)
         tempCy = app.py - app.playerHitbox*math.sin(app.angle)
         tempMy = roundHalfUp((tempCy)//app.cellWidth)
@@ -617,13 +619,23 @@ def raceMode_keyPressed(app, event):
 
     # Pan Left and Right
     elif event.key == 'Left':
+
+        # Slow down forward speed when turning
+        app.speed = app.playerRadius * 0.5
+        raceMode_timerFired(app)\
+
         if app.angle + 0.05 >= 2*math.pi:
             app.angle -= 2*math.pi
         app.angle += 0.05
     elif event.key == 'Right':
+        app.speed = app.playerRadius * 0.5
+        raceMode_timerFired(app)
         if app.angle - 0.05 < 0:
             app.angle += 2*math.pi
         app.angle -= 0.05
+    
+    # Reset speed to normal after turning
+    app.speed = app.playerRadius
 
 def raceMode_timerFired(app):
     # Move forwards constantly
