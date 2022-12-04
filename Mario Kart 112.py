@@ -19,16 +19,16 @@ def appStarted(app):
 
     # Start Menu Images
     app.startMenuImage = app.loadImage('Start Menu Image.jpeg')
-    app.scaledStartMenu = app.scaleImage(app.startMenuImage, 2.5)
+    app.scaledStartMenu = app.scaleImage(app.startMenuImage, 2.6)
     app.marioKart112 = app.loadImage('Mario Kart 112.png')
 
     # Map Select Images
     app.mushroomCupImage= app.loadImage('Mushroom Cup.jpeg')
-    app.mushroomCup = app.scaleImage(app.mushroomCupImage, 2/3)
+    app.mushroomCup = app.scaleImage(app.mushroomCupImage, 4/3)
     app.starCupImage = app.loadImage('Star Cup.jpeg')
-    app.starCup = app.scaleImage(app.starCupImage, 2/3)
+    app.starCup = app.scaleImage(app.starCupImage, 4/3)
     app.specialCupImage = app.loadImage('Special Cup.jpeg')
-    app.specialCup = app.scaleImage(app.specialCupImage, 2/3)
+    app.specialCup = app.scaleImage(app.specialCupImage, 4/3)
 
     # Character Select Images
     app.mushroomCellImage = app.loadImage('Mushroom Grid Cell.jpeg')
@@ -135,6 +135,10 @@ def appStarted(app):
     app.bowser = app.scaleImage(app.bowserImage, 1/10)
     app.karts['bowser'] = app.bowser
 
+    # Pause menu
+    app.pauseImage = app.loadImage('Pause.jpg')
+    app.pause = app.scaleImage(app.pauseImage, 1/2)
+
 # Menu credit: https://www.cs.cmu.edu/~112/notes/notes-animations-part4.html#usingModes
 
 ######################################
@@ -148,8 +152,8 @@ def startMenu_redrawAll(app, canvas):
                         image=ImageTk.PhotoImage(app.scaledStartMenu))
     canvas.create_image(app.cx, 100,
                         image=ImageTk.PhotoImage(app.marioKart112))
-    canvas.create_text(app.cx, 300, text="Press any key to continue",
-                       font="impact 40 bold", fill='beige')
+    canvas.create_text(app.cx, 200, text="Press any key to continue",
+                       font="impact 40 bold", fill='white')
 
 def startMenu_keyPressed(app, event):
     # Press any key to continue
@@ -164,18 +168,18 @@ def mapSelect_redrawAll(app, canvas):
     canvas.create_rectangle(0, 0, app.width, app.height, fill='dodgerblue')
     canvas.create_image(app.width*1/6, app.cy,
                         image=ImageTk.PhotoImage(app.mushroomCup))
-    canvas.create_text(app.width*1/6, app.cy+85, text='Mushroom Cup',
-                       font='helvetica 17 bold', fill='navy blue')
+    canvas.create_text(app.width*1/6, app.height*5/6, text='Mushroom Cup',
+                       font='helvetica 27 bold', fill='navy blue')
     canvas.create_image(app.cx, app.cy,
                         image=ImageTk.PhotoImage(app.starCup))
-    canvas.create_text(app.cx, app.cy+85, text='Star Cup',
-                       font='helvetica 17 bold', fill='navy blue')
+    canvas.create_text(app.cx, app.height*5/6, text='Star Cup',
+                       font='helvetica 27 bold', fill='navy blue')
     canvas.create_image(app.width*5/6, app.cy,
                         image=ImageTk.PhotoImage(app.specialCup))
-    canvas.create_text(app.width*5/6, app.cy+85, text='Special Cup',
-                       font='helvetica 17 bold', fill='navy blue')
+    canvas.create_text(app.width*5/6, app.height*5/6, text='Special Cup',
+                       font='helvetica 27 bold', fill='navy blue')
     canvas.create_text(app.cx, 100, text='Click on the icon to select the map!',
-                       font='Impact 20', fill='yellow')
+                       font='Impact 30', fill='yellow')
     canvas.create_text(10, 10, text='<< Esc to go back', fill='black',
                        font='impact 10', anchor='nw')
 
@@ -633,6 +637,10 @@ def raceMode_keyPressed(app, event):
         if app.angle - 0.05 < 0:
             app.angle += 2*math.pi
         app.angle -= 0.05
+
+    # press 'p' to pause
+    elif event.key == 'p':
+        app.mode = 'pause'
     
     # Reset speed to normal after turning
     app.speed = app.playerRadius
@@ -656,5 +664,25 @@ def raceMode_redrawAll(app, canvas):
     drawRays3D(app, canvas, 180)
     drawGrid(app.cellWidth, app.selectedMap, canvas)
     drawPlayer(app, canvas)
+
+def pause_redrawAll(app, canvas):
+    # Draw pause menu screen
+    canvas.create_rectangle(0, 0, app.width, app.height, fill='black')
+    canvas.create_image(app.cx, app.cy, image=ImageTk.PhotoImage(app.pause))
+    canvas.create_rectangle(280, 470, 670, app.height, fill='black')
+    canvas.create_text(app.cx, app.cy-120, text='Press P again to unpause',
+                       font='Impact 40 bold', fill='navy')
+    canvas.create_text(app.cx, app.cy-40, text='Press Esc to quit',
+                       font='Impact 40 bold', fill='navy')
+
+def pause_keyPressed(app, event):
+    if event.key == 'p':
+        app.mode = 'raceMode'
+    elif event.key == 'Escape':
+        app.mode = 'startMenu'
+        # reset kart properties
+        app.px = app.cellWidth//2
+        app.py = app.cellWidth//2
+        app.angle = 0
 
 runApp(width=1498, height=576)
