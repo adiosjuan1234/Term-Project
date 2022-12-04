@@ -15,29 +15,38 @@ def appStarted(app):
     app.cx = app.width/2
     app.cy = app.height/2
 
-    # Image credit: https://www.cs.cmu.edu/~112/notes/notes-animations-part4.html#loadImageUsingUrl
+    # Image code credit: # https://www.cs.cmu.edu/~112/notes/notes-animations-part4.html#loadImageUsingUrl
 
     # Start Menu Images
     app.startMenuImage = app.loadImage('Start Menu Image.jpeg')
+        # https://imgs.search.brave.com/VAmtw9ECmanDxPKW_k0OLQg6rIccFpHUOjbVN8FXVig/rs:fit:1024:768:1/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJhY2Nlc3Mu/Y29tL2Z1bGwvMjEz/OTgwMS5qcGc
     app.scaledStartMenu = app.scaleImage(app.startMenuImage, 2.6)
     app.marioKart112 = app.loadImage('Mario Kart 112.png')
+        # https://fontmeme.com/super-mario-font/
 
     # Map Select Images
     app.mushroomCupImage= app.loadImage('Mushroom Cup.jpeg')
+        # https://imgs.search.brave.com/tYLnsQg_6bhK4LRFkrHYkczS_dLVaV0jshY2UpPsvz0/rs:fit:474:225:1/g:ce/aHR0cHM6Ly90c2Ux/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC5B/dm9yM2tWX1FfMUlM/UWlfUUVfbFBBSGFI/YSZwaWQ9QXBp
     app.mushroomCup = app.scaleImage(app.mushroomCupImage, 4/3)
     app.starCupImage = app.loadImage('Star Cup.jpeg')
+        # https://imgs.search.brave.com/u3ul2NQsn2r93-gNiuZcQ24jkot2nj9U9Ag2PGZsPhU/rs:fit:474:225:1/g:ce/aHR0cHM6Ly90c2Uz/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC50/endNT0NiQ3NPZkdQ/ZE9rN3d1cjZ3SGFI/YSZwaWQ9QXBp
     app.starCup = app.scaleImage(app.starCupImage, 4/3)
     app.specialCupImage = app.loadImage('Special Cup.jpeg')
+        # https://imgs.search.brave.com/f_waJsPeCPhblhbaClvaHp3SnOnvGKQI6RkxrWOPrNk/rs:fit:474:225:1/g:ce/aHR0cHM6Ly90c2U0/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC56/NzJEb1BSTG9icEsz/T3VGRERaWFF3SGFI/YSZwaWQ9QXBp
     app.specialCup = app.scaleImage(app.specialCupImage, 4/3)
 
     # Character Select Images
     app.mushroomCellImage = app.loadImage('Mushroom Grid Cell.jpeg')
+        # https://imgs.search.brave.com/ynN4-fVQvqntZsSchTlvnXpMEeUe8G2QjK-krfO_7Vs/rs:fit:467:225:1/g:ce/aHR0cHM6Ly90c2Ux/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC5U/dWRlVEF4VGZaRW5m/R3UzTXFfdWVRSGFI/aCZwaWQ9QXBp
     app.singleMushroom = app.scaleImage(app.mushroomCellImage, 1/5)
     app.starCellImage = app.loadImage('Star Grid Cell.jpeg')
+        # https://imgs.search.brave.com/aeNSduQYStBbewGDsHtrVhLTJ5cGnjSO9SAp1ndSjEw/rs:fit:498:225:1/g:ce/aHR0cHM6Ly90c2U0/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC5O/NUVCbmFWcEZ5eWVn/YmpxWVhRZ3BRSGFI/RCZwaWQ9QXBp
     app.singleStar = app.scaleImage(app.starCellImage, 1/5)
     app.crownCellImage = app.loadImage('Crown Grid Cell.jpeg')
+        # https://imgs.search.brave.com/o8Zs5dTMwXvFALnmtTFy1QA-yoMukdrcyUxAjKr9tlo/rs:fit:494:225:1/g:ce/aHR0cHM6Ly90c2Uz/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC5S/em5iN1Vqem1lVFM0/VHkxd0l0Vy13SGFI/RyZwaWQ9QXBp
     app.singleCrown = app.scaleImage(app.crownCellImage, 1/5)
     app.characterSelect = app.loadImage('Character Select.jpeg')
+        # https://imgs.search.brave.com/C0F1iCYy5ofXPgYPhfrM_r568ofNa-twnf7OhH6wUvE/rs:fit:844:225:1/g:ce/aHR0cHM6Ly90c2Uz/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC44/M25RdlhfdWZpUnJO/VGlObXdKVzNBSGFF/SyZwaWQ9QXBp
     app.characters = app.scaleImage(app.characterSelect, 3/2)
     app.selectedCharacter = ''
 
@@ -111,32 +120,41 @@ def appStarted(app):
     # Character Karts
     app.karts = dict()
     app.marioImage = app.loadImage('Mario.png')
+        # https://www.google.com/imgres?imgurl=https%3A%2F%2Fmario.wiki.gallery%2Fimages%2Fthumb%2Fa%2Fa0%2FMK8_Mario_Drifting_Standard_Kart_Shadowless_Artwork.png%2F1200px-MK8_Mario_Drifting_Standard_Kart_Shadowless_Artwork.png&imgrefurl=https%3A%2F%2Fwww.mariowiki.com%2FKart&tbnid=FQ_ViX32YnjeCM&vet=12ahUKEwitqO29n9_7AhW5n3IEHQ5oDm4QMygBegUIARDmAQ..i&docid=2uaIM1bxjayIiM&w=1200&h=1027&q=mario%20kart%20mario&client=opera-gx&ved=2ahUKEwitqO29n9_7AhW5n3IEHQ5oDm4QMygBegUIARDmAQ
     app.mario = app.scaleImage(app.marioImage, 1/10)
     app.karts['mario'] = app.mario
     app.luigiImage = app.loadImage('Luigi.png')
+        # https://imgs.search.brave.com/hEwto3ZDNL_YcTnNQpOXz96a-rv5YbuaKIcju3gnszs/rs:fit:474:225:1/g:ce/aHR0cHM6Ly90c2Uz/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC53/LWo3d2c5bkhSdUUw/WldNNzJuaDR3SGFI/YSZwaWQ9QXBp
     app.luigi = app.scaleImage(app.luigiImage, 1/10)
     app.karts['luigi'] = app.luigi
     app.peachImage = app.loadImage('Peach.png')
+        # https://imgs.search.brave.com/xPP0i7ieWCoPdS1ctLhfpwGk97T9yCu5RHbUa7-McY0/rs:fit:390:225:1/g:ce/aHR0cHM6Ly90c2Ux/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC5l/U0RET21ET0dTakRU/SXZWTy0xTEFnSGFJ/XyZwaWQ9QXBp
     app.peach = app.scaleImage(app.peachImage, 1/10)
     app.karts['peach'] = app.peach
     app.toadImage = app.loadImage('Toad.png')
+        # https://imgs.search.brave.com/TBHPvP0qhkqEoVSJTEpO5Q7orWV5B78htvsySvDdjAo/rs:fit:428:225:1/g:ce/aHR0cHM6Ly90c2Uy/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC5l/Rmhvb1NROUh4ak1a/ZHZNZnVVN0xBSGFJ/TSZwaWQ9QXBp
     app.toad = app.scaleImage(app.toadImage, 1/10)
     app.karts['toad'] = app.toad
     app.yoshiImage = app.loadImage('Yoshi.png')
+        # https://imgs.search.brave.com/Vqxs2jbvIw4zQ10dDz37_CKGcNd0gxpCL49w3ddJ_Nk/rs:fit:449:225:1/g:ce/aHR0cHM6Ly90c2U0/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC5F/aGhieERFamFsS2lt/c0kzOXdTdzB3SGFI/MCZwaWQ9QXBp
     app.yoshi = app.scaleImage(app.yoshiImage, 1/10)
     app.karts['yoshi'] = app.yoshi
     app.dkImage = app.loadImage('Donkey Kong.png')
+        # https://www.google.com/imgres?imgurl=https%3A%2F%2Fm.media-amazon.com%2Fimages%2FI%2F71lO1%2BX8cSS.jpg&imgrefurl=https%3A%2F%2Fwww.amazon.com%2FHallmark-Keepsake-Christmas-Ornament-Nintendo%2Fdp%2FB0915R1DVF&tbnid=87liFywnBGK46M&vet=12ahUKEwiWmKPLn9_7AhWQvHIEHdJ9B44QMygBegUIARDvAQ..i&docid=NADVkGzdvSUxaM&w=2560&h=2560&q=mario%20kart%20donkey%20kong&client=opera-gx&ved=2ahUKEwiWmKPLn9_7AhWQvHIEHdJ9B44QMygBegUIARDvAQ
     app.dk = app.scaleImage(app.dkImage, 1/10)
     app.karts['donkeykong'] = app.dk
     app.warioImage = app.loadImage('Wario.png')
+        # https://imgs.search.brave.com/MAUmI2T8BYNLlcNZGSJX9nultWDlNBGvVyuvoGtKRxA/rs:fit:397:225:1/g:ce/aHR0cHM6Ly90c2Uz/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC50/LUxVc0xhbGthMG5F/VE1RZEloVjJRSGFJ/MSZwaWQ9QXBp
     app.wario = app.scaleImage(app.warioImage, 1/10)
     app.karts['wario'] = app.wario
     app.bowserImage = app.loadImage('Bowser.png')
+        # https://imgs.search.brave.com/peQRweN8h1h7ZVkSf8FGRZ29aowxw-LhFTpje0jyZLg/rs:fit:413:225:1/g:ce/aHR0cHM6Ly90c2Uz/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC5j/ZU5DRG5VY2VpZldT/X0xhelVHc2hRSGFJ/ZyZwaWQ9QXBp
     app.bowser = app.scaleImage(app.bowserImage, 1/10)
     app.karts['bowser'] = app.bowser
 
     # Pause menu
     app.pauseImage = app.loadImage('Pause.jpg')
+        # https://imgs.search.brave.com/dTHPCpFJ02O8p0vCcew3ZdPSMy-o8lxyox4b9j1rDdY/rs:fit:759:225:1/g:ce/aHR0cHM6Ly90c2Uy/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC5O/WHl5OHlreGF1T203/YVdaQ0dpbm13SGFF/byZwaWQ9QXBp
     app.pause = app.scaleImage(app.pauseImage, 1/2)
 
 # Menu credit: https://www.cs.cmu.edu/~112/notes/notes-animations-part4.html#usingModes
@@ -669,7 +687,9 @@ def pause_redrawAll(app, canvas):
     # Draw pause menu screen
     canvas.create_rectangle(0, 0, app.width, app.height, fill='black')
     canvas.create_image(app.cx, app.cy, image=ImageTk.PhotoImage(app.pause))
+    # remove watermark LOL
     canvas.create_rectangle(280, 470, 670, app.height, fill='black')
+    # put text
     canvas.create_text(app.cx, app.cy-120, text='Press P again to unpause',
                        font='Impact 40 bold', fill='navy')
     canvas.create_text(app.cx, app.cy-40, text='Press Esc to quit',
