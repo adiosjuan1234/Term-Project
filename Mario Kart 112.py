@@ -100,9 +100,9 @@ def appStarted(app):
 
     # Racer + Track properties
     app.playerRadius = 1.5
-    app.speed = app.playerRadius
+    app.speed = app.playerRadius * 1.2
     app.playerHitbox = 8
-    app.cellWidth = 32
+    app.cellWidth = app.height/len(app.map1)
     app.px = app.cellWidth//2
     app.py = app.cellWidth//2
     app.angle = 0
@@ -657,4 +657,4 @@ def raceMode_redrawAll(app, canvas):
     drawGrid(app.cellWidth, app.selectedMap, canvas)
     drawPlayer(app, canvas)
 
-runApp(width=1332, height=512)
+runApp(width=1498, height=576)
