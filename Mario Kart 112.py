@@ -116,6 +116,9 @@ def appStarted(app):
     app.py = app.cellWidth//2
     app.angle = 0
     app.timerDelay = 10
+    app.lap = 1
+    app.temp = False
+    app.checkpoint = False
 
     # Character Karts
     app.karts = dict()
@@ -156,6 +159,16 @@ def appStarted(app):
     app.pauseImage = app.loadImage('Pause.jpg')
         # https://imgs.search.brave.com/dTHPCpFJ02O8p0vCcew3ZdPSMy-o8lxyox4b9j1rDdY/rs:fit:759:225:1/g:ce/aHR0cHM6Ly90c2Uy/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC5O/WHl5OHlreGF1T203/YVdaQ0dpbm13SGFF/byZwaWQ9QXBp
     app.pause = app.scaleImage(app.pauseImage, 1/2)
+
+    # Finish line
+    app.finishline = [[1, 0],
+                      [0, 1],
+                      [1, 0],
+                      [0, 1],
+                      [1, 0],
+                      [0, 1],
+                      [1, 0],
+                      [0, 1]]
 
 # Menu credit: https://www.cs.cmu.edu/~112/notes/notes-animations-part4.html#usingModes
 
@@ -427,17 +440,49 @@ def drawPlayer(app, canvas):
     canvas.create_image(app.px, app.py, 
                         image=ImageTk.PhotoImage(kart))
 
-def drawGrid(cellWidth, map, canvas):
+def drawGrid(app, cellWidth, map, canvas):
     # draw the 2D track
     for row in range(len(map)):
         for col in range(len(map[0])):
             canvas.create_rectangle(cellWidth * col, cellWidth * row,
                                         cellWidth * (col+1), cellWidth*(row+1),
-                                        fill='black', width=1)
+                                        fill='dark gray', width=0)
             if map[row][col] == 1:
                 canvas.create_rectangle(cellWidth * col, cellWidth * row,
                                         cellWidth * (col+1), cellWidth*(row+1),
                                         fill='white', width=0)
+
+    # draw finish line
+    rows = len(app.finishline)
+    cols = len(app.finishline[0])
+    for row in range(rows):
+        for col in range(cols):
+            if map == app.map1 or map == app.map2:
+                if app.finishline[row][col] == 1:
+                    canvas.create_rectangle(cellWidth*(2 + (col-1)/rows),
+                                            cellWidth*2/rows*row,
+                                            cellWidth*(2 + col/rows),
+                                            cellWidth*2/rows*(row+1),
+                                            fill='white')
+                elif app.finishline[row][col] == 0:
+                    canvas.create_rectangle(cellWidth*(2 + (col-1)/rows),
+                                            cellWidth*2/rows*row,
+                                            cellWidth*(2 + col/rows),
+                                            cellWidth*2/rows*(row+1),
+                                            fill='black')
+            else:
+                if app.finishline[row][col] == 1:
+                    canvas.create_rectangle(cellWidth*(1 + (col-1)/rows),
+                                            cellWidth/rows*row,
+                                            cellWidth*(1 + col/rows),
+                                            cellWidth/rows*(row+1),
+                                            fill='white')
+                elif app.finishline[row][col] == 0:
+                    canvas.create_rectangle(cellWidth*(1 + (col-1)/rows),
+                                            cellWidth/rows*row,
+                                            cellWidth*(1 + col/rows),
+                                            cellWidth/rows*(row+1),
+                                            fill='black')
 
 # Raycasting credit: https://www.youtube.com/watch?v=gYRrGTC7GtA
 
@@ -607,6 +652,62 @@ def drawRays3D(app, canvas, numDeg):
             canvas.create_line(xCoord, lineOffset, xCoord, lineOffset+lineHeight,
                            width=app.width/numDeg, fill='green')
 
+def checkPoint(app, px, py):
+    left = app.cellWidth*(len(app.map1)-3)
+    right = app.cellWidth*len(app.map1)
+    if px > left and px < right:
+        if py > left and py < app.height:
+            app.checkpoint = True
+
+def isLap(app, px, py):
+    # Check if the kart passed the checkpoint
+    if app.checkpoint:
+    # Check if the kart isn't moving backwards
+        if app.angle < math.pi/2 or app.angle > math.pi*1.5:
+            # Check if kart is on the finish line (map-dependent)
+            if app.selectedMap == app.map1 or app.selectedMap == app.map2:
+                left = app.cellWidth*(2 - 1/len(app.finishline))
+                right = app.cellWidth*(2 + 1/len(app.finishline))
+                if px > left and px < right:
+                    if py > 0 and py < app.cellWidth*2:
+                        app.checkpoint = False
+                        return True
+            else:
+                left = app.cellWidth*(1 - 1/len(app.finishline))
+                right = app.cellWidth*(1 + 1/len(app.finishline))
+                if px > left and px < right:
+                    if py > 0 and py < app.cellWidth:
+                        app.checkpoint - False
+                        return True
+        return False
+
+def changeLap(app):
+    # if the kart is on the line and it wasn't immediately before, lap += 1
+    if isLap(app, app.px, app.py) and not app.temp:
+        app.temp = True
+        app.lap += 1
+
+    # if the kart is still on the line, lap shouldn't increment by 1
+    elif not isLap(app, app.px, app.py):
+        app.temp = False
+
+def drawStats(app, canvas):
+    canvas.create_rectangle((app.width+app.cellWidth*len(app.map1))/2-100, 
+                            app.height * 1/10,
+                            (app.width+app.cellWidth*len(app.map1))/2+100,
+                            app.height * 1/5, fill = 'dodgerblue', width=3)
+    canvas.create_text((app.width+app.cellWidth*len(app.map1))/2, 
+                       app.height * 3/20, text=f'Lap: {app.lap}',
+                       font='Roboto 20 bold', fill='black')
+
+def gameOver(app):
+    # Game ends after 3 laps
+    if app.lap > 3:
+        app.mode = 'gameOver'
+        app.px = app.cellWidth//2
+        app.py = app.cellWidth//2
+        app.angle = 0
+
 def raceMode_keyPressed(app, event):
 
     # Speed x and y components
@@ -664,6 +765,12 @@ def raceMode_keyPressed(app, event):
     app.speed = app.playerRadius
 
 def raceMode_timerFired(app):
+
+    # Keep track of laps
+    checkPoint(app, app.px, app.py)
+    changeLap(app)
+    gameOver(app)
+
     # Move forwards constantly
     dy = app.speed*math.sin(app.angle)
     dx = app.speed*math.cos(app.angle)
@@ -680,16 +787,17 @@ def raceMode_timerFired(app):
 def raceMode_redrawAll(app, canvas):
     drawBackground(app, canvas)
     drawRays3D(app, canvas, 180)
-    drawGrid(app.cellWidth, app.selectedMap, canvas)
+    drawStats(app, canvas)
+    drawGrid(app, app.cellWidth, app.selectedMap, canvas)
     drawPlayer(app, canvas)
 
 def pause_redrawAll(app, canvas):
     # Draw pause menu screen
     canvas.create_rectangle(0, 0, app.width, app.height, fill='black')
     canvas.create_image(app.cx, app.cy, image=ImageTk.PhotoImage(app.pause))
-    # remove watermark LOL
+    # Remove watermark
     canvas.create_rectangle(280, 470, 670, app.height, fill='black')
-    # put text
+    # Draw text (instructions)
     canvas.create_text(app.cx, app.cy-120, text='Press P again to unpause',
                        font='Impact 40 bold', fill='navy')
     canvas.create_text(app.cx, app.cy-40, text='Press Esc to quit',
@@ -704,5 +812,15 @@ def pause_keyPressed(app, event):
         app.px = app.cellWidth//2
         app.py = app.cellWidth//2
         app.angle = 0
+        app.lap = 0
+
+def gameOver_redrawAll(app, canvas):
+    canvas.create_rectangle(0, 0, app.width, app.height, fill='green')
+
+def gameOver_keyPressed(app, event):
+    if event.key == 'r':
+        app.mode = 'mapSelect'
+    elif event.key == 'q':
+        quit()
 
 runApp(width=1498, height=576)
