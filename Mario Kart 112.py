@@ -826,6 +826,11 @@ def gameOver_redrawAll(app, canvas):
                             app.height*1/3+40, fill='pink', width=5)
     canvas.create_text(app.cx, app.height * 1/3, text='Game Over!',
                        font='Impact 40 bold', fill='navy')
+    canvas.create_rectangle(app.cx-250, app.height*2/3-60, app.cx+250, 
+                            app.height*2/3+60, fill='yellow', width=5)
+    canvas.create_text(app.cx, app.height * 2/3, 
+                       text='Press R to Play Again \n Press Q twice to exit',
+                       font='Roboto 30 bold')
 
 def gameOver_keyPressed(app, event):
     if event.key == 'r':
