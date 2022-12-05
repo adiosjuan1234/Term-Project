@@ -170,6 +170,11 @@ def appStarted(app):
                       [1, 0],
                       [0, 1]]
 
+    # Game over menu
+    app.congratsImage = app.loadImage('Game Over.png')
+        # https://imgs.search.brave.com/AXE5RF5e2zfd52Bvx-QFWkG_oWmT17sHhRJBKvktLjY/rs:fit:1200:1080:1/g:ce/aHR0cHM6Ly9pbWFn/ZXMubGF1bmNoYm94/LWFwcC5jb20vNmZm/OWVjNGYtN2I1Yy00/NWMwLTlmZjMtZjgw/MWJjMzI1MGNhLnBu/Zw
+    app.congrats = app.scaleImage(app.congratsImage, 0.9)
+
 # Menu credit: https://www.cs.cmu.edu/~112/notes/notes-animations-part4.html#usingModes
 
 ######################################
@@ -692,12 +697,12 @@ def changeLap(app):
         app.temp = False
 
 def drawStats(app, canvas):
-    canvas.create_rectangle((app.width+app.cellWidth*len(app.map1))/2-100, 
+    canvas.create_oval((app.width+app.cellWidth*len(app.map1))/2-100, 
                             app.height * 1/10,
                             (app.width+app.cellWidth*len(app.map1))/2+100,
                             app.height * 1/5, fill = 'dodgerblue', width=3)
     canvas.create_text((app.width+app.cellWidth*len(app.map1))/2, 
-                       app.height * 3/20, text=f'Lap: {app.lap}',
+                       app.height * 3/20, text=f'Lap: {app.lap}/3',
                        font='Roboto 20 bold', fill='black')
 
 def gameOver(app):
@@ -815,9 +820,12 @@ def pause_keyPressed(app, event):
         app.lap = 0
 
 def gameOver_redrawAll(app, canvas):
-    canvas.create_rectangle(0, 0, app.width, app.height, fill='green')
+    canvas.create_rectangle(0, 0, app.width, app.height, fill='black')
+    canvas.create_image(app.cx, app.cy, image=ImageTk.PhotoImage(app.congrats))
+    canvas.create_rectangle(app.cx-150, app.height*1/3-40, app.cx+150, 
+                            app.height*1/3+40, fill='pink', width=5)
     canvas.create_text(app.cx, app.height * 1/3, text='Game Over!',
-                       font='Impact 40 bold', fill='black')
+                       font='Impact 40 bold', fill='navy')
 
 def gameOver_keyPressed(app, event):
     if event.key == 'r':
