@@ -816,6 +816,8 @@ def pause_keyPressed(app, event):
 
 def gameOver_redrawAll(app, canvas):
     canvas.create_rectangle(0, 0, app.width, app.height, fill='green')
+    canvas.create_text(app.cx, app.height * 1/3, text='Game Over!',
+                       font='Impact 40 bold', fill='black')
 
 def gameOver_keyPressed(app, event):
     if event.key == 'r':
