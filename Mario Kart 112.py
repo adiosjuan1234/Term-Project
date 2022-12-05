@@ -745,7 +745,7 @@ def raceMode_keyPressed(app, event):
 
         # Slow down forward speed when turning
         app.speed = app.playerRadius * 0.5
-        raceMode_timerFired(app)\
+        raceMode_timerFired(app)
 
         if app.angle + 0.05 >= 2*math.pi:
             app.angle -= 2*math.pi
