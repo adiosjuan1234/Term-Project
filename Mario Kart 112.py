@@ -173,7 +173,8 @@ def appStarted(app):
     # Game over menu
     app.congratsImage = app.loadImage('Game Over.png')
         # https://imgs.search.brave.com/AXE5RF5e2zfd52Bvx-QFWkG_oWmT17sHhRJBKvktLjY/rs:fit:1200:1080:1/g:ce/aHR0cHM6Ly9pbWFn/ZXMubGF1bmNoYm94/LWFwcC5jb20vNmZm/OWVjNGYtN2I1Yy00/NWMwLTlmZjMtZjgw/MWJjMzI1MGNhLnBu/Zw
-    app.congrats = app.scaleImage(app.congratsImage, 0.9)
+    _ , congratsHeight = app.congratsImage.size
+    app.congrats = app.scaleImage(app.congratsImage, app.height/congratsHeight)
 
 # Menu credit: https://www.cs.cmu.edu/~112/notes/notes-animations-part4.html#usingModes
 
