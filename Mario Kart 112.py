@@ -1,9 +1,10 @@
 from cmu_112_graphics import *
 import math
+import random
 import decimal
 
 ######################################
-# appStarted: Declare global variables
+# appStarted
 ######################################
 
 def appStarted(app):
@@ -134,6 +135,29 @@ def appStarted(app):
     app.itembox3 = [(app.cellWidth*9.5, app.cellWidth*1.5), 
                     (app.cellWidth*13, app.cellWidth*12.5),
                     (app.cellWidth*3.5, app.cellWidth*11)]
+    
+    # Items
+    app.currentItem = ''
+    app.items = ['mushroom', 'banana', 'golden mushroom', 'fake-itembox']
+    app.mushroomSprite = app.loadImage('Mushroom.png')
+        # https://imgs.search.brave.com/AN8aCv_VECwW9Ztnmb9-Nm9tcqjPY2XlVp4bgmj1_6c/rs:fit:880:915:1/g:ce/aHR0cHM6Ly9pMi53/cC5jb20vd3d3LnBp/bmNsaXBhcnQuY29t/L3BpY2Rpci9taWRk/bGUvNTI0LTUyNDE4/Nzhfc3VwZXItbWFy/aW8tbXVzaHJvb20t/Y2xpcGFydC1tYXJp/by1rYXJ0LXdpaS1t/dXNocm9vbS5wbmc
+    mSize, _ = app.mushroomSprite.size
+    app.mushroom = app.scaleImage(app.mushroomSprite, 60/mSize)
+    app.bananaSprite = app.loadImage('Banana.png')
+        # https://imgs.search.brave.com/qLK4y46nVq7vOzNfB_ZqFBlPaEtnQiUhRCjdNfCBHCI/rs:fit:434:225:1/g:ce/aHR0cHM6Ly90c2U0/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC4w/VjJCMW0tSDZMVm1t/TTVHWWVrekh3SGFH/RyZwaWQ9QXBp
+    bSize, _ = app.bananaSprite.size
+    app.banana = app.scaleImage(app.bananaSprite, 60/bSize)
+    app.goldenMushroomSprite = app.loadImage('Golden Mushroom.png')
+        # https://imgs.search.brave.com/PTXJK_FFiSgHuqIY82xSC_3iBSv75ZaGqhWsqVnT3rI/rs:fit:124:225:1/g:ce/aHR0cHM6Ly90c2U0/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC5x/LWRDWkVsclNMeDI3/RzVGVGdySmtnQUFB/QSZwaWQ9QXBp
+    gSize, _ = app.goldenMushroomSprite.size
+    app.goldenMushroom = app.scaleImage(app.goldenMushroomSprite, 60/gSize)
+    app.fakeItemBoxSprite = app.loadImage('Fake Item Box.png')
+        # https://imgs.search.brave.com/66w4nRr7I2MCCVjaWGonXcf-BXrOHQAqK3qu2LtqmYc/rs:fit:64:64:1/g:ce/aHR0cHM6Ly93d3cu/bWFyaW93aWtpLmNv/bS9pbWFnZXMvMS8x/Yy9NS1dfRmFrZV9J/dGVtX0JveF9TcHJp/dGUucG5n
+    fSize, _ = app.fakeItemBoxSprite.size
+    app.fakeItemBox = app.scaleImage(app.fakeItemBoxSprite, 60/fSize)
+    app.itemsTemp = False
+    app.bananaCoords = []
+    app.fakeitemboxCoords = []
 
     # Character Karts
     app.karts = dict()
@@ -705,6 +729,8 @@ def draw3D(app, canvas, numDeg):
     # Sprite-casting
     ##############################
 
+    # Sprite-casting credit: https://wynnliam.github.io/raycaster/news/tutorial/2019/04/03/raycaster-part-02.html
+
         for itembox in app.itemMap:
             spriteDist = rayDist(app.px, app.py, itembox[0], itembox[1])
 
@@ -738,6 +764,10 @@ def draw3D(app, canvas, numDeg):
         canvas.create_image(spriteX, app.cy + 50, 
                             image=ImageTk.PhotoImage(itemboxImg))
 
+######################################
+# Lap Properties
+######################################
+
 def checkPoint(app, px, py):
     left = app.cellWidth*(len(app.map1)-3)
     right = app.cellWidth*len(app.map1)
@@ -749,7 +779,7 @@ def isLap(app, px, py):
     # Check if the kart passed the checkpoint
     if app.checkpoint:
     # Check if the kart isn't moving backwards
-        if app.angle < math.pi/2 or app.angle > math.pi*1.5:
+        if app.angle <= math.pi/2 or app.angle >= math.pi*1.5:
             # Check if kart is on the finish line (map-dependent)
             if app.selectedMap == app.map1 or app.selectedMap == app.map2:
                 left = app.cellWidth*(2 - 1/len(app.finishline))
@@ -786,13 +816,68 @@ def drawStats(app, canvas):
                        app.height * 3/20, text=f'Lap: {app.lap}/3',
                        font='Roboto 20 bold', fill='black')
 
-def gameOver(app):
-    # Game ends after 3 laps
-    if app.lap > 3:
-        app.mode = 'gameOver'
-        app.px = app.cellWidth//2
-        app.py = app.cellWidth//2
-        app.angle = 0
+def hitItemBox(app, px, py):
+    for item in app.itemMap:
+        if px >= item[0] - app.cellWidth/3 - 20 and px <= item[0] + app.cellWidth/3:
+            if py >= item[1] - app.cellWidth/3 and py <= item[1] + app.cellWidth/3:
+                return True
+    return False
+
+def getItem(app):
+    if hitItemBox(app, app.px, app.py) and not app.itemsTemp:
+        app.itemsTemp = True
+        index = random.randint(0, len(app.items) - 1)
+        app.currentItem = app.items[index]
+    elif not hitItemBox(app, app.px, app.py):
+        app.itemsTemp = False
+
+def drawItem(app, canvas):
+    margin = 20
+    itemFrameWidth = 64
+    left = app.height + margin
+    right = app.height + margin + itemFrameWidth
+    top = margin
+    bottom = margin + itemFrameWidth
+    canvas.create_rectangle(left, top, right, bottom, fill='black',
+                            outline = 'white', width=4)
+    
+    if len(app.currentItem) != 0:
+        if app.currentItem == 'mushroom':
+            canvas.create_image(app.height+margin+itemFrameWidth/2, margin+itemFrameWidth/2,
+                                image=ImageTk.PhotoImage(app.mushroom))
+        elif app.currentItem == 'banana':
+            canvas.create_image(app.height+margin+itemFrameWidth/2, margin+itemFrameWidth/2,
+                                image=ImageTk.PhotoImage(app.banana))
+        elif app.currentItem == 'golden mushroom':
+            canvas.create_image(app.height+margin+itemFrameWidth/2, margin+itemFrameWidth/2,
+                                image=ImageTk.PhotoImage(app.goldenMushroom))
+        elif app.currentItem == 'fake-itembox':
+            canvas.create_image(app.height+margin+itemFrameWidth/2, margin+itemFrameWidth/2,
+                                image=ImageTk.PhotoImage(app.fakeItemBox))
+
+def useItem(app, event):
+    if app.currentItem == 'mushroom':
+        if event.key == 'Space':
+            # Speed x and y components
+            dy = app.speed*math.sin(app.angle)
+            dx = app.speed*math.cos(app.angle)
+
+            # Move forwards at the same time
+            raceMode_timerFired(app)
+
+            tempCx = app.px + app.playerHitbox*math.cos(app.angle)
+            tempCy = app.py - app.playerHitbox*math.sin(app.angle)
+            tempMy = roundHalfUp((tempCy)//app.cellWidth)
+            tempMx = roundHalfUp((tempCx)//app.cellWidth)
+            if tempCx > 0 and tempCx < app.cellWidth*len(app.selectedMap):
+                if tempCy > 0 and tempCy < app.height:
+                    if app.selectedMap[tempMy][tempMx] == 0:
+                        app.py -= dy
+                        app.px += dx
+
+######################################
+# raceMode
+######################################
 
 def raceMode_keyPressed(app, event):
 
@@ -857,6 +942,9 @@ def raceMode_timerFired(app):
     changeLap(app)
     gameOver(app)
 
+    # Keep track of items
+    getItem(app)
+
     # Move forwards constantly
     dy = app.speed*math.sin(app.angle)
     dx = app.speed*math.cos(app.angle)
@@ -873,9 +961,14 @@ def raceMode_timerFired(app):
 def raceMode_redrawAll(app, canvas):
     drawBackground(app, canvas)
     draw3D(app, canvas, 180)
+    drawItem(app, canvas)
     drawStats(app, canvas)
     drawGrid(app, app.cellWidth, app.selectedMap, canvas)
     drawPlayer(app, canvas)
+
+######################################
+# Pause Menu
+######################################
 
 def pause_redrawAll(app, canvas):
     # Draw pause menu screen
@@ -899,6 +992,18 @@ def pause_keyPressed(app, event):
         app.py = app.cellWidth//2
         app.angle = 0
         app.lap = 0
+
+######################################
+# Game Over
+######################################
+
+def gameOver(app):
+    # Game ends after 3 laps
+    if app.lap > 3:
+        app.mode = 'gameOver'
+        app.px = app.cellWidth//2
+        app.py = app.cellWidth//2
+        app.angle = 0
 
 def gameOver_redrawAll(app, canvas):
     canvas.create_rectangle(0, 0, app.width, app.height, fill='black')
