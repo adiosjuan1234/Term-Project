@@ -116,7 +116,9 @@ def appStarted(app):
     app.px = app.cellWidth//2
     app.py = app.cellWidth//2
     app.angle = 0
-    app.timerDelay = 10
+    app.timerDelay = 40
+    app.frames = 0
+    app.timePassed = 0
     app.lap = 1
     app.temp = False
     app.checkpoint = False
@@ -158,6 +160,7 @@ def appStarted(app):
     app.itemsTemp = False
     app.bananaCoords = []
     app.fakeitemboxCoords = []
+    app.speedboost = False
 
     # Character Karts
     app.karts = dict()
@@ -489,12 +492,12 @@ def specialCup_mousePressed(app, event):
 
 def almostEqual(d1, d2, epsilon=10**-7):
     return (abs(d2 - d1) < epsilon)
-    # Credit: Previous 112 homeworks
+    # Credit: HW 1
 
 def roundHalfUp(d):
     rounding = decimal.ROUND_HALF_UP
     return int(decimal.Decimal(d).to_integral_value(rounding=rounding))
-    # Credit: Previous 112 homeworks
+    # Credit: HW 1
 
 def drawBackground(app, canvas):
     # draw the sky and road
@@ -556,7 +559,7 @@ def drawGrid(app, cellWidth, map, canvas):
 # Raycasting credit: https://www.youtube.com/watch?v=gYRrGTC7GtA
 
 def rayDist(cx, cy, rx, ry):
-    # Pythagorean Theorem Distance Formula
+    # Pythagorean Theorem Distance Formula (HW 1)
     return math.sqrt((rx-cx)**2 + (ry-cy)**2)
 
 def getHorizontalRayEnd(app, angle, px, py, map):
@@ -674,9 +677,9 @@ def draw3D(app, canvas, numDeg):
     ##############################
     
     distFinal = 0
-    visible = (0, 0)
-    spriteDist = 0
-    spriteScale = 0
+    visible, visibleBanana, visibleFake = (0, 0), (0, 0), (0, 0)
+    spriteDist, bananaDist, fakeDist = 0, 0, 0
+    spriteScale, bananaScale, fakeScale = 0, 0, 0
 
     for x in range(numDeg+1):
         # Get the angle
@@ -743,26 +746,81 @@ def draw3D(app, canvas, numDeg):
                 visible = itembox
                 spriteScale = 266/spriteDist
                 break
+        
+        for banana in app.bananaCoords:
+            bananaDist = rayDist(app.px, app.py, banana[0], banana[1])
+
+            bdx = banana[0] - app.px
+            bdy = banana[1] - app.py
+
+            bp = math.atan2(-1*bdy, bdx) % (math.pi*2)
+
+            if bananaDist < distFinal and bananaDist != 0:
+                if bananaDist < spriteDist and almostEqual(angle, bp, math.pi/6):
+                    visibleBanana = banana
+                    bananaScale = 200/bananaDist
+                    break
+
+        for fake in app.fakeitemboxCoords:
+            fakeDist = rayDist(app.px, app.py, fake[0], fake[1])
+
+            fdx = fake[0] - app.px
+            fdy = fake[1] - app.py
+
+            fp = math.atan2(-1*fdy, fdx) % (math.pi*2)
+
+            if fakeDist < distFinal and fakeDist != 0:
+                if fakeDist < spriteDist and almostEqual(angle, fp, math.pi/6):
+                    visibleFake = fake
+                    fakeScale = 230/fakeDist
+                    break
 
     distx = visible[0] - app.px
     disty = visible[1] - app.py
+    bananaDx = visibleBanana[0] - app.px
+    bananaDy = visibleBanana[1] - app.py
+    fakeDx = visibleFake[0] - app.px
+    fakeDy = visibleFake[1] - app.py
 
     p = math.atan2(-1*disty, distx) % (math.pi*2)
     q = app.angle + math.pi/6 - p
+    bp = math.atan2(-1*bananaDy, bananaDx) % (math.pi*2)
+    bq = app.angle + math.pi/6 - bp
+    fp = math.atan2(-1*fakeDy, fakeDx) % (math.pi*2)
+    fq = app.angle + math.pi/6 - fp
 
     if app.angle >= 0 and app.angle <= math.pi/2:
         if p >= math.pi*1.5 and p <= math.pi*2:
             q += math.pi*2
+        if bp >= math.pi*1.5 and bp <= math.pi*2:
+            bq += math.pi*2
+        if fp >= math.pi*1.5 and fp <= math.pi*2:
+            fq += math.pi*2
     elif app.angle >= math.pi*1.5 and app.angle <= math.pi*2:
         if p >= 0 and p <= math.pi/2:
             q -= math.pi*2
+        if bp >= 0 and bp <= math.pi/2:
+            bq -= math.pi*2
+        if fp >= 0 and fp <= math.pi/2:
+            fq -= math.pi*2
+        
 
     spriteX = q * ((app.width-app.height) / (math.pi/3)) + app.height
+    bananaX = bq * ((app.width-app.height) / (math.pi/3)) + app.height
+    fakeX = fq * ((app.width-app.height) / (math.pi/3)) + app.height
 
     if spriteScale < app.height/64*3/4 and spriteScale > 0:
         itemboxImg = app.scaleImage(app.itemboxUnscaled, spriteScale)
         canvas.create_image(spriteX, app.cy + 50, 
                             image=ImageTk.PhotoImage(itemboxImg))
+    if bananaScale < app.height/60*3/4 and bananaScale > 0:
+        bananaImg = app.scaleImage(app.banana, bananaScale)
+        canvas.create_image(bananaX, app.cy + 60, 
+                            image=ImageTk.PhotoImage(bananaImg))
+    if fakeScale < app.height/60*3/4 and fakeScale > 0:
+        fakeImg = app.scaleImage(app.fakeItemBox, fakeScale)
+        canvas.create_image(fakeX, app.cy + 50, 
+                            image=ImageTk.PhotoImage(fakeImg))
 
 ######################################
 # Lap Properties
@@ -855,26 +913,6 @@ def drawItem(app, canvas):
             canvas.create_image(app.height+margin+itemFrameWidth/2, margin+itemFrameWidth/2,
                                 image=ImageTk.PhotoImage(app.fakeItemBox))
 
-def useItem(app, event):
-    if app.currentItem == 'mushroom':
-        if event.key == 'Space':
-            # Speed x and y components
-            dy = app.speed*math.sin(app.angle)
-            dx = app.speed*math.cos(app.angle)
-
-            # Move forwards at the same time
-            raceMode_timerFired(app)
-
-            tempCx = app.px + app.playerHitbox*math.cos(app.angle)
-            tempCy = app.py - app.playerHitbox*math.sin(app.angle)
-            tempMy = roundHalfUp((tempCy)//app.cellWidth)
-            tempMx = roundHalfUp((tempCx)//app.cellWidth)
-            if tempCx > 0 and tempCx < app.cellWidth*len(app.selectedMap):
-                if tempCy > 0 and tempCy < app.height:
-                    if app.selectedMap[tempMy][tempMx] == 0:
-                        app.py -= dy
-                        app.px += dx
-
 ######################################
 # raceMode
 ######################################
@@ -932,10 +970,37 @@ def raceMode_keyPressed(app, event):
     elif event.key == 'p':
         app.mode = 'pause'
     
+    # press Space to use item
+    elif event.key == 'Space':
+        if app.currentItem == 'mushroom':
+            app.speedboost = True
+        elif app.currentItem == 'banana':
+            app.currentItem = ''
+            bx, by = app.px, app.py
+            app.bananaCoords.append((bx, by))
+        elif app.currentItem == 'golden mushroom':
+            app.speedboost = True
+        elif app.currentItem == 'fake-itembox':
+            app.currentItem = ''
+            fx, fy = app.px, app.py
+            app.fakeitemboxCoords.append((fx, fy))
+    
     # Reset speed to normal after turning
     app.speed = app.playerRadius
 
 def raceMode_timerFired(app):
+    app.frames += 1
+    if not app.speedboost:
+        app.frames -= 1
+    app.timePassed = app.frames // (1000/app.timerDelay)
+    if app.timePassed > 1 and app.currentItem == 'mushroom':
+        app.speedboost = False
+        app.frames = 0
+        app.currentItem = ''
+    elif app.timePassed > 8:
+        app.speedboost = False
+        app.frames = 0
+        app.currentItem = ''
 
     # Keep track of laps
     checkPoint(app, app.px, app.py)
@@ -946,17 +1011,30 @@ def raceMode_timerFired(app):
     getItem(app)
 
     # Move forwards constantly
-    dy = app.speed*math.sin(app.angle)
-    dx = app.speed*math.cos(app.angle)
-    tempCx = app.px + app.playerHitbox*math.cos(app.angle)
-    tempCy = app.py - app.playerHitbox*math.sin(app.angle)
-    tempMy = roundHalfUp((tempCy)//app.cellWidth)
-    tempMx = roundHalfUp((tempCx)//app.cellWidth)
-    if tempCx > 0 and tempCx < app.cellWidth*len(app.selectedMap):
-        if tempCy > 0 and tempCy < app.cellWidth*len(app.selectedMap):
-            if app.selectedMap[tempMy][tempMx] == 0:
-                app.py -= dy
-                app.px += dx
+    if app.speedboost:
+        dy = app.speed*2*math.sin(app.angle)
+        dx = app.speed*2*math.cos(app.angle)
+        tempCx = app.px + app.playerHitbox*math.cos(app.angle)
+        tempCy = app.py - app.playerHitbox*math.sin(app.angle)
+        tempMy = roundHalfUp((tempCy)//app.cellWidth)
+        tempMx = roundHalfUp((tempCx)//app.cellWidth)
+        if tempCx > 0 and tempCx < app.cellWidth*len(app.selectedMap):
+            if tempCy > 0 and tempCy < app.cellWidth*len(app.selectedMap):
+                if app.selectedMap[tempMy][tempMx] == 0:
+                    app.py -= dy
+                    app.px += dx
+    else:
+        dy = app.speed*math.sin(app.angle)
+        dx = app.speed*math.cos(app.angle)
+        tempCx = app.px + app.playerHitbox*math.cos(app.angle)
+        tempCy = app.py - app.playerHitbox*math.sin(app.angle)
+        tempMy = roundHalfUp((tempCy)//app.cellWidth)
+        tempMx = roundHalfUp((tempCx)//app.cellWidth)
+        if tempCx > 0 and tempCx < app.cellWidth*len(app.selectedMap):
+            if tempCy > 0 and tempCy < app.cellWidth*len(app.selectedMap):
+                if app.selectedMap[tempMy][tempMx] == 0:
+                    app.py -= dy
+                    app.px += dx
 
 def raceMode_redrawAll(app, canvas):
     drawBackground(app, canvas)
@@ -1004,6 +1082,7 @@ def gameOver(app):
         app.px = app.cellWidth//2
         app.py = app.cellWidth//2
         app.angle = 0
+        app.lap = 0
 
 def gameOver_redrawAll(app, canvas):
     canvas.create_rectangle(0, 0, app.width, app.height, fill='black')
