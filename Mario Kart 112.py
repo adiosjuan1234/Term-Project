@@ -120,6 +120,21 @@ def appStarted(app):
     app.temp = False
     app.checkpoint = False
 
+    # Item box properties
+    app.itemboxSprite = app.loadImage('Item Box.png')
+    side, _ = app.itemboxSprite.size
+    app.itemboxUnscaled = app.scaleImage(app.itemboxSprite, 64/side)
+    app.itemMap = []
+    app.itembox1 = [(app.cellWidth*11, app.cellWidth), 
+                    (app.cellWidth*10, app.cellWidth*9),
+                    (app.cellWidth, app.cellWidth*12)]
+    app.itembox2 = [(app.cellWidth*5.5, app.cellWidth*2.5), 
+                    (app.cellWidth*11, app.cellWidth*15),
+                    (app.cellWidth, app.cellWidth*14)]
+    app.itembox3 = [(app.cellWidth*9.5, app.cellWidth*1.5), 
+                    (app.cellWidth*13, app.cellWidth*12.5),
+                    (app.cellWidth*3.5, app.cellWidth*11)]
+
     # Character Karts
     app.karts = dict()
     app.marioImage = app.loadImage('Mario.png')
@@ -271,37 +286,45 @@ def mushroomCup_mousePressed(app, event):
         if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'mario'
             app.selectedMap = app.map1
+            app.itemMap = app.itembox1
             app.mode = 'raceMode'
         elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'yoshi'
             app.selectedMap = app.map1
+            app.itemMap = app.itembox1
             app.mode = 'raceMode'
     elif event.x >= x0+charCellX+margin and event.x <= x0+2*charCellX+margin:
         if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'luigi'
             app.selectedMap = app.map1
+            app.itemMap = app.itembox1
             app.mode = 'raceMode'
         elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'donkeykong'
             app.selectedMap = app.map1
+            app.itemMap = app.itembox1
             app.mode = 'raceMode'
     elif event.x >= x0+2*charCellX+2*margin and event.x <= x0+3*charCellX+2*margin:
         if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'peach'
             app.selectedMap = app.map1
+            app.itemMap = app.itembox1
             app.mode = 'raceMode'
         elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'wario'
             app.selectedMap = app.map1
+            app.itemMap = app.itembox1
             app.mode = 'raceMode'
     elif event.x >= x0+3*charCellX+3*margin and event.x <= x0+4*charCellX+3*margin:
         if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'toad'
             app.selectedMap = app.map1
+            app.itemMap = app.itembox1
             app.mode = 'raceMode'
         elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'bowser'
             app.selectedMap = app.map1
+            app.itemMap = app.itembox1
             app.mode = 'raceMode'
 
 def starCup_redrawAll(app, canvas):
@@ -329,37 +352,45 @@ def starCup_mousePressed(app, event):
         if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'mario'
             app.selectedMap = app.map2
+            app.itemMap = app.itembox2
             app.mode = 'raceMode'
         elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'yoshi'
             app.selectedMap = app.map2
+            app.itemMap = app.itembox2
             app.mode = 'raceMode'
     elif event.x >= x0+charCellX+margin and event.x <= x0+2*charCellX+margin:
         if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'luigi'
             app.selectedMap = app.map2
+            app.itemMap = app.itembox2
             app.mode = 'raceMode'
         elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'donkeykong'
             app.selectedMap = app.map2
+            app.itemMap = app.itembox2
             app.mode = 'raceMode'
     elif event.x >= x0+2*charCellX+2*margin and event.x <= x0+3*charCellX+2*margin:
         if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'peach'
             app.selectedMap = app.map2
+            app.itemMap = app.itembox2
             app.mode = 'raceMode'
         elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'wario'
             app.selectedMap = app.map2
+            app.itemMap = app.itembox2
             app.mode = 'raceMode'
     elif event.x >= x0+3*charCellX+3*margin and event.x <= x0+4*charCellX+3*margin:
         if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'toad'
             app.selectedMap = app.map2
+            app.itemMap = app.itembox2
             app.mode = 'raceMode'
         elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'bowser'
             app.selectedMap = app.map2
+            app.itemMap = app.itembox2
             app.mode = 'raceMode'
 
 def specialCup_redrawAll(app, canvas):
@@ -387,37 +418,45 @@ def specialCup_mousePressed(app, event):
         if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'mario'
             app.selectedMap = app.map3
+            app.itemMap = app.itembox3
             app.mode = 'raceMode'
         elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'yoshi'
             app.selectedMap = app.map3
+            app.itemMap = app.itembox3
             app.mode = 'raceMode'
     elif event.x >= x0+charCellX+margin and event.x <= x0+2*charCellX+margin:
         if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'luigi'
             app.selectedMap = app.map3
+            app.itemMap = app.itembox3
             app.mode = 'raceMode'
         elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'donkeykong'
             app.selectedMap = app.map3
+            app.itemMap = app.itembox3
             app.mode = 'raceMode'
     elif event.x >= x0+2*charCellX+2*margin and event.x <= x0+3*charCellX+2*margin:
         if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'peach'
             app.selectedMap = app.map3
+            app.itemMap = app.itembox3
             app.mode = 'raceMode'
         elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'wario'
             app.selectedMap = app.map3
+            app.itemMap = app.itembox3
             app.mode = 'raceMode'
     elif event.x >= x0+3*charCellX+3*margin and event.x <= x0+4*charCellX+3*margin:
         if event.y >= y0 and event.y <= y0 + charCellY:
             app.selectedCharacter = 'toad'
             app.selectedMap = app.map3
+            app.itemMap = app.itembox3
             app.mode = 'raceMode'
         elif event.y >= y0+charCellY+margin and event.y <= y0+2*charCellY+margin:
             app.selectedCharacter = 'bowser'
             app.selectedMap = app.map3
+            app.itemMap = app.itembox3
             app.mode = 'raceMode'
 
 ######################################
@@ -604,17 +643,18 @@ def getVerticalRayEnd(app, angle, px, py, map):
                 dof += 1
     return rx, ry
 
-def drawRays3D(app, canvas, numDeg):
-    distFinal = 0
+def draw3D(app, canvas, numDeg):
+
+    ##############################
+    # Raycasting
+    ##############################
     
+    distFinal = 0
+
     for x in range(numDeg+1):
         # Get the angle
         angleDiff = 0.01745329/3*(-1*numDeg/2 + x)
-        angle = app.angle + angleDiff
-        if angle < 0:
-            angle += 2*math.pi
-        elif angle > 2*math.pi:
-            angle -= 2*math.pi
+        angle = (app.angle + angleDiff) % (math.pi*2)
 
         # Get the ray endpoints
         hx, hy = getHorizontalRayEnd(app, angle, app.px, app.py, app.selectedMap)
@@ -633,10 +673,10 @@ def drawRays3D(app, canvas, numDeg):
             distFinal = distH
 
         # multiply by cos(angleDiff) to remove fish-eye effect
-        distFinal = distFinal * math.cos(angleDiff)
+        distFinalcos = distFinal * math.cos(angleDiff)
 
         # 3D line height formula
-        lineHeight = app.cellWidth*app.height/distFinal
+        lineHeight = app.cellWidth*app.height/distFinalcos
         if lineHeight > app.height:
             lineHeight = app.height
 
@@ -657,6 +697,36 @@ def drawRays3D(app, canvas, numDeg):
         elif distH < distV:
             canvas.create_line(xCoord, lineOffset, xCoord, lineOffset+lineHeight,
                            width=app.width/numDeg, fill='green')
+
+        ##############################
+        # Sprite-casting
+        ##############################
+
+        for itembox in app.itemMap:
+            spriteDist = rayDist(app.px, app.py, itembox[0], itembox[1])
+
+            if spriteDist >= distFinal:
+                continue
+
+            distx = itembox[0] - app.px
+            disty = itembox[1] - app.py
+
+            p = math.atan2(-1*disty, distx) % (math.pi*2)
+            q = app.angle + math.pi/6 - p
+
+            if app.angle >= 0 and app.angle <= math.pi/2:
+                if p >= math.pi*1.5 and p <= math.pi*2:
+                    q += math.pi*2
+            elif app.angle >= math.pi*1.5 and app.angle <= math.pi*2:
+                if p >= 0 and p <= math.pi/2:
+                    q -= math.pi*2
+
+            spriteX = q * ((app.width-app.height) / (math.pi/3)) + app.height
+            spriteScale = 266/spriteDist
+
+            if spriteDist < distFinal and spriteScale < app.height/64*1/2:
+                itemboxImg = app.scaleImage(app.itemboxUnscaled, spriteScale)
+                canvas.create_image(spriteX, app.cy, image=ImageTk.PhotoImage(itemboxImg))
 
 def checkPoint(app, px, py):
     left = app.cellWidth*(len(app.map1)-3)
@@ -792,7 +862,7 @@ def raceMode_timerFired(app):
 
 def raceMode_redrawAll(app, canvas):
     drawBackground(app, canvas)
-    drawRays3D(app, canvas, 180)
+    draw3D(app, canvas, 180)
     drawStats(app, canvas)
     drawGrid(app, app.cellWidth, app.selectedMap, canvas)
     drawPlayer(app, canvas)
