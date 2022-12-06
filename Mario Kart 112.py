@@ -650,6 +650,9 @@ def draw3D(app, canvas, numDeg):
     ##############################
     
     distFinal = 0
+    visible = (0, 0)
+    spriteDist = 0
+    spriteScale = 0
 
     for x in range(numDeg+1):
         # Get the angle
@@ -698,35 +701,42 @@ def draw3D(app, canvas, numDeg):
             canvas.create_line(xCoord, lineOffset, xCoord, lineOffset+lineHeight,
                            width=app.width/numDeg, fill='green')
 
-        ##############################
-        # Sprite-casting
-        ##############################
+    ##############################
+    # Sprite-casting
+    ##############################
 
         for itembox in app.itemMap:
             spriteDist = rayDist(app.px, app.py, itembox[0], itembox[1])
 
-            if spriteDist >= distFinal:
-                continue
+            dx = itembox[0] - app.px
+            dy = itembox[1] - app.py
 
-            distx = itembox[0] - app.px
-            disty = itembox[1] - app.py
+            p = math.atan2(-1*dy, dx) % (math.pi*2)
 
-            p = math.atan2(-1*disty, distx) % (math.pi*2)
-            q = app.angle + math.pi/6 - p
+            if spriteDist < distFinal and almostEqual(angle, p, math.pi/6):
+                visible = itembox
+                spriteScale = 266/spriteDist
+                break
 
-            if app.angle >= 0 and app.angle <= math.pi/2:
-                if p >= math.pi*1.5 and p <= math.pi*2:
-                    q += math.pi*2
-            elif app.angle >= math.pi*1.5 and app.angle <= math.pi*2:
-                if p >= 0 and p <= math.pi/2:
-                    q -= math.pi*2
+    distx = visible[0] - app.px
+    disty = visible[1] - app.py
 
-            spriteX = q * ((app.width-app.height) / (math.pi/3)) + app.height
-            spriteScale = 266/spriteDist
+    p = math.atan2(-1*disty, distx) % (math.pi*2)
+    q = app.angle + math.pi/6 - p
 
-            if spriteDist < distFinal and spriteScale < app.height/64*1/2:
-                itemboxImg = app.scaleImage(app.itemboxUnscaled, spriteScale)
-                canvas.create_image(spriteX, app.cy, image=ImageTk.PhotoImage(itemboxImg))
+    if app.angle >= 0 and app.angle <= math.pi/2:
+        if p >= math.pi*1.5 and p <= math.pi*2:
+            q += math.pi*2
+    elif app.angle >= math.pi*1.5 and app.angle <= math.pi*2:
+        if p >= 0 and p <= math.pi/2:
+            q -= math.pi*2
+
+    spriteX = q * ((app.width-app.height) / (math.pi/3)) + app.height
+
+    if spriteScale < app.height/64*3/4 and spriteScale > 0:
+        itemboxImg = app.scaleImage(app.itemboxUnscaled, spriteScale)
+        canvas.create_image(spriteX, app.cy + 50, 
+                            image=ImageTk.PhotoImage(itemboxImg))
 
 def checkPoint(app, px, py):
     left = app.cellWidth*(len(app.map1)-3)
