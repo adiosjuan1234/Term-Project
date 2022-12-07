@@ -2,6 +2,7 @@ from cmu_112_graphics import *
 import math
 import random
 import decimal
+import ast
 
 ######################################
 # appStarted
@@ -110,7 +111,7 @@ def appStarted(app):
 
     # Racer + Track properties
     app.playerRadius = 1.5
-    app.speed = app.playerRadius * 1.2
+    app.speed = app.playerRadius * 2
     app.playerHitbox = 8
     app.cellWidth = app.height/len(app.map1)
     app.px = app.cellWidth//2
@@ -118,6 +119,8 @@ def appStarted(app):
     app.angle = 0
     app.timerDelay = 40
     app.frames = 0
+    app.totalTime = 0
+    app.totalTimePassed = 0
     app.timePassed = 0
     app.lap = 1
     app.temp = False
@@ -161,6 +164,7 @@ def appStarted(app):
     app.bananaCoords = []
     app.fakeitemboxCoords = []
     app.speedboost = False
+    app.collision = False
 
     # Character Karts
     app.karts = dict()
@@ -913,6 +917,20 @@ def drawItem(app, canvas):
             canvas.create_image(app.height+margin+itemFrameWidth/2, margin+itemFrameWidth/2,
                                 image=ImageTk.PhotoImage(app.fakeItemBox))
 
+def itemCollision(app, px, py):
+    bananaRadius = 4
+    fakeRadius = 5
+    for banana in app.bananaCoords:
+        if px >= banana[0] - bananaRadius and px <= banana[0] + bananaRadius:
+            if py >= banana[1] - bananaRadius and py <= banana[1] + bananaRadius:
+                app.collision = True
+                app.bananaCoords.remove(banana)
+    for fake in app.fakeitemboxCoords:
+        if px >= fake[0] - fakeRadius and px <= fake[0] + fakeRadius:
+            if py >= fake[1] - fakeRadius and py <= fake[1] + fakeRadius:
+                app.collision = True
+                app.fakeitemboxCoords.remove(fake)
+
 ######################################
 # raceMode
 ######################################
@@ -923,22 +941,8 @@ def raceMode_keyPressed(app, event):
     dy = app.speed*math.sin(app.angle)
     dx = app.speed*math.cos(app.angle)
 
-    # Speed up + Move backwards
-    if event.key == 'w':
-
-        # Move forwards at the same time
-        raceMode_timerFired(app)
-
-        tempCx = app.px + app.playerHitbox*math.cos(app.angle)
-        tempCy = app.py - app.playerHitbox*math.sin(app.angle)
-        tempMy = roundHalfUp((tempCy)//app.cellWidth)
-        tempMx = roundHalfUp((tempCx)//app.cellWidth)
-        if tempCx > 0 and tempCx < app.cellWidth*len(app.selectedMap):
-            if tempCy > 0 and tempCy < app.height:
-                if app.selectedMap[tempMy][tempMx] == 0:
-                    app.py -= dy
-                    app.px += dx
-    elif event.key == 's':
+    # Move backwards
+    if event.key == 's':
         tempCx = app.px - app.playerHitbox*math.cos(app.angle)
         tempCy = app.py + app.playerHitbox*math.sin(app.angle)
         tempMy = roundHalfUp((tempCy)//app.cellWidth)
@@ -966,11 +970,11 @@ def raceMode_keyPressed(app, event):
             app.angle += 2*math.pi
         app.angle -= 0.05
 
-    # press 'p' to pause
+    # Pause
     elif event.key == 'p':
         app.mode = 'pause'
     
-    # press Space to use item
+    # Use item
     elif event.key == 'Space':
         if app.currentItem == 'mushroom':
             app.speedboost = True
@@ -989,15 +993,21 @@ def raceMode_keyPressed(app, event):
     app.speed = app.playerRadius
 
 def raceMode_timerFired(app):
+    app.totalTime += 1
+    app.totalTimePassed = app.totalTime // (1000/app.timerDelay)
+
     app.frames += 1
-    if not app.speedboost:
+    if not app.speedboost and not app.collision:
         app.frames -= 1
     app.timePassed = app.frames // (1000/app.timerDelay)
-    if app.timePassed > 1 and app.currentItem == 'mushroom':
+    if app.timePassed >= 2 and app.currentItem == 'mushroom':
         app.speedboost = False
         app.frames = 0
         app.currentItem = ''
-    elif app.timePassed > 8:
+    elif app.timePassed >= 1 and app.collision:
+        app.collision = False
+        app.frames = 0
+    elif app.timePassed >= 8 and app.currentItem == 'golden mushroom':
         app.speedboost = False
         app.frames = 0
         app.currentItem = ''
@@ -1007,13 +1017,26 @@ def raceMode_timerFired(app):
     changeLap(app)
     gameOver(app)
 
-    # Keep track of items
+    # Keep track of items and collisions
     getItem(app)
+    itemCollision(app, app.px, app.py)
 
     # Move forwards constantly
     if app.speedboost:
-        dy = app.speed*2*math.sin(app.angle)
-        dx = app.speed*2*math.cos(app.angle)
+        dy = app.speed*3*math.sin(app.angle)
+        dx = app.speed*3*math.cos(app.angle)
+        tempCx = app.px + app.playerHitbox*math.cos(app.angle)
+        tempCy = app.py - app.playerHitbox*math.sin(app.angle)
+        tempMy = roundHalfUp((tempCy)//app.cellWidth)
+        tempMx = roundHalfUp((tempCx)//app.cellWidth)
+        if tempCx > 0 and tempCx < app.cellWidth*len(app.selectedMap):
+            if tempCy > 0 and tempCy < app.cellWidth*len(app.selectedMap):
+                if app.selectedMap[tempMy][tempMx] == 0:
+                    app.py -= dy
+                    app.px += dx
+    elif app.collision:
+        dy = app.speed*0.3*math.sin(app.angle)
+        dx = app.speed*0.3*math.cos(app.angle)
         tempCx = app.px + app.playerHitbox*math.cos(app.angle)
         tempCy = app.py - app.playerHitbox*math.sin(app.angle)
         tempMy = roundHalfUp((tempCy)//app.cellWidth)
@@ -1079,21 +1102,32 @@ def gameOver(app):
     # Game ends after 3 laps
     if app.lap > 3:
         app.mode = 'gameOver'
+        # Reset race + track properties
         app.px = app.cellWidth//2
         app.py = app.cellWidth//2
         app.angle = 0
-        app.lap = 0
+        app.lap = 1
+        # Store time into .txt file
+        writeFile('myData.txt', repr([app.totalTimePassed]))
 
 def gameOver_redrawAll(app, canvas):
     canvas.create_rectangle(0, 0, app.width, app.height, fill='black')
     canvas.create_image(app.cx, app.cy, image=ImageTk.PhotoImage(app.congrats))
-    canvas.create_rectangle(app.cx-150, app.height*1/3-40, app.cx+150, 
-                            app.height*1/3+40, fill='pink', width=5)
-    canvas.create_text(app.cx, app.height * 1/3, text='Game Over!',
+    canvas.create_rectangle(app.cx-150, app.height*1/5-40, app.cx+150, 
+                            app.height*1/5+40, fill='pink', width=5)
+    canvas.create_text(app.cx, app.height * 1/5, text='Game Over!',
                        font='Impact 40 bold', fill='navy')
-    canvas.create_rectangle(app.cx-250, app.height*2/3-60, app.cx+250, 
-                            app.height*2/3+60, fill='yellow', width=5)
-    canvas.create_text(app.cx, app.height * 2/3, 
+    canvas.create_rectangle(app.cx-225, app.cy-70, app.cx+225, app.cy+70,
+                            fill='beige', width=5)
+    # Display current time all-time highscore
+    allTimeScores = ast.literal_eval(readFile('myData.txt'))
+    highscore = max(allTimeScores)
+    canvas.create_text(app.cx, app.cy,
+                       text=f"Your score: {app.totalTimePassed}s \n Highscore: {highscore}s",
+                       font='Roboto 40 bold')
+    canvas.create_rectangle(app.cx-250, app.height*4/5-60, app.cx+250, 
+                            app.height*4/5+60, fill='yellow', width=5)
+    canvas.create_text(app.cx, app.height*4/5, 
                        text='Press R to Play Again \n Press Q twice to exit',
                        font='Roboto 30 bold')
 
@@ -1102,5 +1136,14 @@ def gameOver_keyPressed(app, event):
         app.mode = 'mapSelect'
     elif event.key == 'q':
         quit()
+
+# Basic File IO Credit: https://www.cs.cmu.edu/~112/notes/notes-strings.html#basicFileIO
+def readFile(path):
+    with open(path, "rt") as f:
+        return f.read()
+
+def writeFile(path, contents):
+    with open(path, "wt") as f:
+        f.write(contents)
 
 runApp(width=1498, height=576)
