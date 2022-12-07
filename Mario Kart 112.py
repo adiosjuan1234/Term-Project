@@ -1152,7 +1152,7 @@ def gameOver_redrawAll(app, canvas):
                             app.height*1/5+40, fill='pink', width=5)
     canvas.create_text(app.cx, app.height * 1/5, text='Game Over!',
                        font='Impact 40 bold', fill='navy')
-    canvas.create_rectangle(app.cx-225, app.cy-70, app.cx+225, app.cy+70,
+    canvas.create_rectangle(app.cx-230, app.cy-70, app.cx+230, app.cy+70,
                             fill='beige', width=5)
     # Display current time all-time highscore
     allTimeScores = ast.literal_eval(readFile('myData.txt'))
@@ -1160,7 +1160,7 @@ def gameOver_redrawAll(app, canvas):
     highscore = min(mapScores)
     canvas.create_text(app.cx, app.cy,
                        text=f"Your score: {app.totalTimePassed}s \n Highscore: {highscore}s",
-                       font='Roboto 40 bold')
+                       font='Roboto 35 bold')
     canvas.create_rectangle(app.cx-250, app.height*4/5-60, app.cx+250, 
                             app.height*4/5+60, fill='yellow', width=5)
     canvas.create_text(app.cx, app.height*4/5, 
