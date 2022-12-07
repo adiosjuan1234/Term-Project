@@ -1128,6 +1128,9 @@ def pause_keyPressed(app, event):
         app.py = app.cellWidth//2
         app.angle = 0
         app.lap = 0
+        # reset item properties
+        app.bananaCoords = []
+        app.fakeitemboxCoords = []
 
 ######################################
 # Game Over
