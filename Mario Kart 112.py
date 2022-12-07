@@ -241,8 +241,10 @@ def startMenu_redrawAll(app, canvas):
                        font="impact 40 bold", fill='white')
 
 def startMenu_keyPressed(app, event):
-    # Press any key to continue
-    app.mode = 'mapSelect'
+    if event.key != 'Escape':
+        app.mode = 'mapSelect'
+    else:
+        quit()
 
 ######################################
 # Map Select Menu
