@@ -108,6 +108,7 @@ def appStarted(app):
             [1,1,0,0,0,1,1,1,0,0,0,0,0,0,0,0]
         ]
     app.selectedMap = [[]]
+    app.mapForScore = ''
 
     # Racer + Track properties
     app.playerRadius = 1.5
@@ -122,7 +123,7 @@ def appStarted(app):
     app.totalTime = 0
     app.totalTimePassed = 0
     app.timePassed = 0
-    app.lap = 1
+    app.lap = 4
     app.temp = False
     app.checkpoint = False
 
@@ -217,6 +218,7 @@ def appStarted(app):
                       [0, 1]]
 
     # Game over menu
+    app.allTimeScores = ast.literal_eval(readFile('myData.txt'))
     app.congratsImage = app.loadImage('Game Over.png')
         # https://imgs.search.brave.com/AXE5RF5e2zfd52Bvx-QFWkG_oWmT17sHhRJBKvktLjY/rs:fit:1200:1080:1/g:ce/aHR0cHM6Ly9pbWFn/ZXMubGF1bmNoYm94/LWFwcC5jb20vNmZm/OWVjNGYtN2I1Yy00/NWMwLTlmZjMtZjgw/MWJjMzI1MGNhLnBu/Zw
     _ , congratsHeight = app.congratsImage.size
@@ -273,17 +275,21 @@ def mapSelect_mousePressed(app, event):
     if event.x >= app.width*1/6 - imageRadius and event.x <= app.width*1/6 + imageRadius:
         if event.y >= app.cy - imageRadius and event.y <= app.cy + imageRadius:
             app.mode = 'mushroomCup'
+            app.mapForScore = 'map1'
     elif event.x >= app.cx - imageRadius and event.x <= app.cx + imageRadius:
         if event.y >= app.cy - imageRadius and event.y <= app.cy + imageRadius:
             app.mode = 'starCup'
+            app.mapForScore = 'map2'
     elif event.x >= app.width*5/6 - imageRadius and event.x <= app.width*5/6 + imageRadius:
         if event.y >= app.cy - imageRadius and event.y <= app.cy + imageRadius:
             app.mode = 'specialCup'
+            app.mapForScore = 'map3'
 
 def mapSelect_keyPressed(app, event):
     # Escape to go back
     if event.key == 'Escape':
         app.mode = 'startMenu'
+        app.mapForScore = ''
 
 ######################################
 # Mushroom Cup Menu
@@ -759,8 +765,8 @@ def draw3D(app, canvas, numDeg):
 
             bp = math.atan2(-1*bdy, bdx) % (math.pi*2)
 
-            if bananaDist < distFinal and bananaDist != 0:
-                if bananaDist < spriteDist and almostEqual(angle, bp, math.pi/6):
+            if bananaDist < distFinal and almostEqual(angle, bp, math.pi/6):
+                if bananaDist > 0:
                     visibleBanana = banana
                     bananaScale = 200/bananaDist
                     break
@@ -773,8 +779,8 @@ def draw3D(app, canvas, numDeg):
 
             fp = math.atan2(-1*fdy, fdx) % (math.pi*2)
 
-            if fakeDist < distFinal and fakeDist != 0:
-                if fakeDist < spriteDist and almostEqual(angle, fp, math.pi/6):
+            if fakeDist < distFinal and almostEqual(angle, fp, math.pi/6):
+                if fakeDist > 0:
                     visibleFake = fake
                     fakeScale = 230/fakeDist
                     break
@@ -980,13 +986,15 @@ def raceMode_keyPressed(app, event):
             app.speedboost = True
         elif app.currentItem == 'banana':
             app.currentItem = ''
-            bx, by = app.px, app.py
+            bx = app.px-app.playerHitbox*math.cos(app.angle)
+            by = app.py+app.playerHitbox*math.sin(app.angle)
             app.bananaCoords.append((bx, by))
         elif app.currentItem == 'golden mushroom':
             app.speedboost = True
         elif app.currentItem == 'fake-itembox':
             app.currentItem = ''
-            fx, fy = app.px, app.py
+            fx = app.px-app.playerHitbox*math.cos(app.angle)
+            fy = app.py+app.playerHitbox*math.sin(app.angle)
             app.fakeitemboxCoords.append((fx, fy))
     
     # Reset speed to normal after turning
@@ -1108,7 +1116,9 @@ def gameOver(app):
         app.angle = 0
         app.lap = 1
         # Store time into .txt file
-        writeFile('myData.txt', repr([app.totalTimePassed]))
+        mapScores = app.allTimeScores[app.mapForScore]
+        mapScores.append(app.totalTimePassed)
+        writeFile('myData.txt', repr(app.allTimeScores))
 
 def gameOver_redrawAll(app, canvas):
     canvas.create_rectangle(0, 0, app.width, app.height, fill='black')
@@ -1121,7 +1131,8 @@ def gameOver_redrawAll(app, canvas):
                             fill='beige', width=5)
     # Display current time all-time highscore
     allTimeScores = ast.literal_eval(readFile('myData.txt'))
-    highscore = max(allTimeScores)
+    mapScores = allTimeScores[app.mapForScore]
+    highscore = min(mapScores)
     canvas.create_text(app.cx, app.cy,
                        text=f"Your score: {app.totalTimePassed}s \n Highscore: {highscore}s",
                        font='Roboto 40 bold')
