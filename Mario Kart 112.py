@@ -123,7 +123,7 @@ def appStarted(app):
     app.totalTime = 0
     app.totalTimePassed = 0
     app.timePassed = 0
-    app.lap = 4
+    app.lap = 1
     app.temp = False
     app.checkpoint = False
 
@@ -266,7 +266,9 @@ def mapSelect_redrawAll(app, canvas):
     canvas.create_text(app.cx, 100, text='Click on the icon to select the map!',
                        font='Impact 30', fill='yellow')
     canvas.create_text(10, 10, text='<< Esc to go back', fill='black',
-                       font='impact 10', anchor='nw')
+                       font='impact 20', anchor='nw')
+    canvas.create_text(app.width-10, 10, text='Press H for Help! >>', fill='black',
+                       font='impact 20', anchor='ne')
 
 def mapSelect_mousePressed(app, event):
     # Create buttons for each map
@@ -290,6 +292,29 @@ def mapSelect_keyPressed(app, event):
     if event.key == 'Escape':
         app.mode = 'startMenu'
         app.mapForScore = ''
+    elif event.key == 'h':
+        app.mode = 'help'
+
+######################################
+# Help Menu
+######################################
+
+def help_redrawAll(app, canvas):
+    canvas.create_rectangle(0, 0, app.width, app.height, fill='orange')
+    canvas.create_text(app.cx, app.cy,
+                       text='''
+1. Press S to move backwards
+2. Press the Left/Right arrow keys to turn
+3. Press Space to use an item
+4. Press P to pause
+5. Press on your nose for good luck!
+                       ''', font = 'Roboto 50 bold', fill='maroon')
+    canvas.create_text(10, 10, text='<< Esc to go back', fill='black',
+                       font='impact 20 bold', anchor='nw')
+
+def help_keyPressed(app, event):
+    if event.key == 'Escape':
+        app.mode = 'mapSelect'
 
 ######################################
 # Mushroom Cup Menu
